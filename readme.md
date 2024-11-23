@@ -12,7 +12,7 @@ Fast and dirty VU-Meter with NeoPixel LedStrips and teensy lc for my home DJ Des
 * compatibel with all neopixel strips
 
 
-## Example Setup
+## Example Setup with Keystone Modules
 * [LedStrip](https://www.adafruit.com/product/1507)
 * [teensy lc](https://www.pjrc.com/teensy/teensyLC.html)
 * [Keystone Chassis](https://www.reichelt.de/index.html?ACTION=446&LA=3&nbc=1&q=delock%2086227)
@@ -22,11 +22,22 @@ Fast and dirty VU-Meter with NeoPixel LedStrips and teensy lc for my home DJ Des
 
 Power supply 5V. max. current depends on number of leds.
 
+
+![Final](/images/keystone_setup.jpeg)
+
+## Final build
+![Final](/images/complete.jpeg)
+
+
+
 ## Compile
 * Download [Arduino IDE](https://www.arduino.cc/en/software).
 * Under Settings add [Teensy Lib](https://www.pjrc.com/teensy/package_teensy_index.json) as additional Board Url
 * After download, choose teensy board in options
 * Add [Adafruit_NeoPixel](https://github.com/adafruit/Adafruit_NeoPixel) as library
+
+## Firstlight
+![Final](/images/firstlight.jpeg)
 
 
 ## Config Options
