@@ -21,6 +21,12 @@ Fast and dirty VU-Meter with NeoPixel LedStrips and teensy lc for my home DJ Des
 
 Power supply 5V. max. current depends on number of leds.
 
+## Compile
+* Download [Arduino IDE](https://www.arduino.cc/en/software).
+* Under Settings add [Teensy Lib](https://www.pjrc.com/teensy/package_teensy_index.json) as additional Board Url
+* After download, choose teensy board in options
+* Add [Adafruit_NeoPixel](https://github.com/adafruit/Adafruit_NeoPixel) as library
+
 
 ## Config Options
 ```
