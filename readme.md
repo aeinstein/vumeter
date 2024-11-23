@@ -6,6 +6,7 @@ Fast and dirty VU-Meter with NeoPixel LedStrips and teensy lc for my home DJ Des
 * Mono/Stereo
 * customizable number of leds
 * 2 color effects
+* Peak indicator
 * build for [teensy lc](https://www.pjrc.com/teensy/teensyLC.html)
 * compatibel with all arduino boards
 * compatibel with all neopixel strips
@@ -52,6 +53,14 @@ Power supply 5V. max. current depends on number of leds.
 
 // Number of analog probes in a row. Value is avarage.
 #define NUMREADS 10
+
+// Peek, default decay 0.03f
+#define PEAK_INDICATOR
+#define INDICATOR_STYLE 1
+#define PEAK_DECAY 0.03f
+
+// delay per loop, default 5ms
+#define DELAY_MS 10
 ```
 
 ## Upcoming
