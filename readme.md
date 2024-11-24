@@ -123,4 +123,4 @@ int highColor[] ={ 255,   0,   0};
 
 ## Upcoming
 * more Color effects
-* more Led Layout types
+* trimmer for calibration
