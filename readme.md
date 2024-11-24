@@ -39,39 +39,86 @@ Power supply 5V. max. current depends on number of leds.
 ## Firstlight
 ![Final](/images/firstlight.jpeg)
 
+## led stripe modes
+### Two Strips
+```
+Dual Mode
+ 6    6
+ 5    5
+ 4    4
+ 3    3
+ 2    2
+ 1    1
+ 
+D1   D2
+```
+### One Strip, seperated
+```
+Stripped   Mirror  Folded
+   6          6       1
+   5          5       2
+   4          4       3
+   3          3       4
+   2          2       5
+   1          1       6
+
+   6          1       6
+   5          2       5
+   4          3       4
+   3          4       3
+   2          5       2
+   1          6       1
+
+  D1         D1      D1
+```
 
 ## Config Options
 ```
-// Analog Inputs
+// Analog in pins
 #define Left_IN A1
 #define Right_IN A2
 
-// NeoPixel Datalines
-#define LED_DATA_LEFT 1
-#define LED_DATA_RIGHT 2
+// Data out pins
+#define LED_DATA_LEFT 2
+#define LED_DATA_RIGHT 1
 
-// Number of Leds per strip
-#define NUM_LEDS 32
+// Number of leds per channel
+#define NUM_LEDS 14
 
-// Dimm to 10% because its super bright
+// 10%
 #define BRIGHTNESS 0.1f
 
-// idle white
+// idle color
 #define GLOWNESS 0
 
-// Use Stereo input. If Mono then only left channel is used
+// Use Stereo input. If mono then only left channel is used
 #define STEREO
 
-// Number of analog probes in a row. Value is avarage.
+// Number of analog probes
 #define NUMREADS 10
 
-// Peek, default decay 0.03f
+// momentum of channel value
+#define CHANNEL_DECAY 0.3f
+
+// Peak, default decay 0.05f
 #define PEAK_INDICATOR
 #define INDICATOR_STYLE 1
-#define PEAK_DECAY 0.03f
+#define PEAK_DECAY 0.1f
 
 // delay per loop, default 5ms
-#define DELAY_MS 10
+#define DELAY_MS 20
+
+// led stripe modes
+#define DUAL 1
+#define STRIPPED 2
+#define MIRROR 3
+#define FOLDED 4
+
+#define MODE FOLDED
+
+int lowColor[] = {   0, 255,   0};
+int midColor[] = {   0,   0, 255};
+int highColor[] ={ 255,   0,   0};
 ```
 
 ## Upcoming
