@@ -8,8 +8,14 @@ void setup() {
   pinMode(LED_DATA_LEFT, OUTPUT);
 
 #ifdef STEREO
-  pinMode(LED_DATA_RIGHT, OUTPUT);
   Serial.println("Stereo Mode");
+
+  #if MODE == DUAL
+    pinMode(LED_DATA_RIGHT, OUTPUT);
+    Serial.println("2 Data out channels");
+  #else
+    Serial.println("1 Data out channel");
+  #endif
 #endif
 
 #ifndef STEREO
@@ -19,6 +25,17 @@ void setup() {
 #ifdef PEAK_INDICATOR
   Serial.println("Peak Indicator");
 #endif
+
+  Serial.println("right channel mapping");
+
+  for(int i = 0; i < NUM_LEDS; i++){
+    Serial.print(i, DEC);
+    Serial.print(" -> left ");
+    Serial.print(translateLeftChannel(i), DEC); 
+    Serial.print(" -> right ");
+    Serial.print(translateRightChannel(i), DEC);
+    Serial.println("");
+  }
 }
 
 void loop() {
@@ -32,19 +49,19 @@ void loop() {
   if(rightVal > rightCurrent) rightCurrent = rightVal;
 
 #ifdef PEAK_INDICATOR
-	if(leftVal > leftPeak) leftPeak = leftVal + 1.5f;   // +1 so indicator stays above level and +0.5 prevent flickering
-	if(rightVal > rightPeak) rightPeak = rightVal + 1.5f;
+	if(leftVal >= leftPeak) leftPeak = leftVal + 1.5f;   // +1 so indicator stays above level and +0.5 prevent flickering
+	if(rightVal >= rightPeak) rightPeak = rightVal + 1.5f;
 #endif
 
   setLeds(leftCurrent, rightCurrent);
   delay(DELAY_MS);
 
   // decay
-  if(leftCurrent > 0) leftCurrent--;
-  if(rightCurrent > 0) rightCurrent--;
+  if(leftCurrent > 0) leftCurrent -= CHANNEL_DECAY;
+  if(rightCurrent > 0) rightCurrent -= CHANNEL_DECAY;
 
 #ifdef PEAK_INDICATOR
-  if(leftPeak > 0) leftPeak -= PEAK_DECAY;
-  if(rightPeak > 0) rightPeak -= PEAK_DECAY;
+  if(leftVal + 1.5f < leftPeak && leftPeak > 0) leftPeak -= PEAK_DECAY;
+  if(rightVal + 1.5f < rightPeak && rightPeak > 0) rightPeak -= PEAK_DECAY;
 #endif
 }

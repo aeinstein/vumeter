@@ -3,21 +3,54 @@
 int leftVal = 0;
 int rightVal = 0;
 
-int leftCurrent = 0;
-int rightCurrent = 0;
+float leftCurrent = 0;
+float rightCurrent = 0;
 
 float leftPeak = 0;
 float rightPeak = 0;
 
-Adafruit_NeoPixel pixels_left = Adafruit_NeoPixel(NUM_LEDS, LED_DATA_LEFT, NEO_GRB + NEO_KHZ800);
+#if MODE == DUAL
+  Adafruit_NeoPixel pixels_left = Adafruit_NeoPixel(NUM_LEDS, LED_DATA_LEFT, NEO_GRB + NEO_KHZ800);
 
-#ifdef STEREO
-Adafruit_NeoPixel pixels_right = Adafruit_NeoPixel(NUM_LEDS, LED_DATA_RIGHT, NEO_GRB + NEO_KHZ800);
+  #ifdef STEREO
+    Adafruit_NeoPixel pixels_right = Adafruit_NeoPixel(NUM_LEDS, LED_DATA_RIGHT, NEO_GRB + NEO_KHZ800);
+  #endif
+
+#else
+  #ifdef STEREO
+    Adafruit_NeoPixel pixels_left = Adafruit_NeoPixel(NUM_LEDS *2, LED_DATA_LEFT, NEO_GRB + NEO_KHZ800);
+  #endif
+
+  #ifndef STEREO
+    Adafruit_NeoPixel pixels_left = Adafruit_NeoPixel(NUM_LEDS, LED_DATA_LEFT, NEO_GRB + NEO_KHZ800);
+  #endif
 #endif
 
 int* getColor(int val, int i);
 int* getColor2(int val, int i);
 
+int translateRightChannel(int val){
+  #if MODE == DUAL  
+    return val;
+
+  #elif MODE == STRIPPED
+    return val + NUM_LEDS;
+
+  #elif MODE == MIRROR
+    return val + NUM_LEDS;
+
+  #else
+    return NUM_LEDS *2 - val -1;
+  #endif
+}
+
+int translateLeftChannel(int val){
+  #if MODE == MIRROR
+    return NUM_LEDS - val -1;
+  #else
+    return val;
+  #endif
+}
 
 int getAnalogIN(int pin){
   int tmp = 0;
@@ -41,33 +74,62 @@ void setLeds(int leftVal, int rightVal){
   int *color;
 
   for(int i = 0; i < NUM_LEDS; i++){
-      color = getColor(leftVal, i);
-      pixels_left.setPixelColor(i, pixels_left.Color(color[0] * BRIGHTNESS, color[1] * BRIGHTNESS, color[2] * BRIGHTNESS));
+      color = getColor2(leftVal, i);
+
+      pixels_left.setPixelColor(translateLeftChannel(i), pixels_left.Color(color[0] * BRIGHTNESS, color[1] * BRIGHTNESS, color[2] * BRIGHTNESS));
+
       delete[] color;
 
       #ifdef STEREO
         color = getColor2(rightVal, i);
-        pixels_right.setPixelColor(i, pixels_left.Color(color[0] * BRIGHTNESS, color[1] * BRIGHTNESS, color[2] * BRIGHTNESS));
+
+        #if MODE == DUAL  
+          pixels_right.setPixelColor(translateRightChannel(i), pixels_right.Color(color[0] * BRIGHTNESS, color[1] * BRIGHTNESS, color[2] * BRIGHTNESS));
+
+        #else
+          pixels_left.setPixelColor(translateRightChannel(i), pixels_left.Color(color[0] * BRIGHTNESS, color[1] * BRIGHTNESS, color[2] * BRIGHTNESS));
+        #endif
+
         delete[] color;
+
       #endif
   }
 
   #ifdef PEAK_INDICATOR
   	color = getColor((int)leftPeak, (int)leftPeak);
-  	pixels_left.setPixelColor((int)leftPeak, pixels_left.Color(color[0] * BRIGHTNESS, color[1] * BRIGHTNESS, color[2] * BRIGHTNESS));
+
+    #if MODE == MIRROR
+  	  pixels_left.setPixelColor(NUM_LEDS - (int)leftPeak, pixels_left.Color(color[0] * BRIGHTNESS, color[1] * BRIGHTNESS, color[2] * BRIGHTNESS));
+    #else
+      pixels_left.setPixelColor((int)leftPeak, pixels_left.Color(color[0] * BRIGHTNESS, color[1] * BRIGHTNESS, color[2] * BRIGHTNESS));
+    #endif
+
     delete[] color;
   #endif
-
-  pixels_left.show();
 
   #ifdef STEREO
     #ifdef PEAK_INDICATOR
       color = getColor((int)rightPeak, (int)rightPeak);
-      pixels_right.setPixelColor((int)rightPeak, pixels_right.Color(color[0] * BRIGHTNESS, color[1] * BRIGHTNESS, color[2] * BRIGHTNESS));
+
+      #if MODE == DUAL  
+        pixels_right.setPixelColor(translateRightChannel((int)rightPeak), pixels_right.Color(color[0] * BRIGHTNESS, color[1] * BRIGHTNESS, color[2] * BRIGHTNESS));
+      #else
+        pixels_left.setPixelColor(translateRightChannel((int)rightPeak), pixels_left.Color(color[0] * BRIGHTNESS, color[1] * BRIGHTNESS, color[2] * BRIGHTNESS));
+      #endif
+
       delete[] color;
     #endif
+  #endif
+
+  pixels_left.show();
+
+  #if MODE == DUAL
     pixels_right.show();
   #endif
+}
+
+void copyColor(int* src, int* dst, int len) {
+    for (int i = 0; i < len; i++) *dst++ = *src++;
 }
 
 // Led Colors remain
@@ -75,20 +137,14 @@ int* getColor2(int val, int i){
   int *tmpColor = new int[3];
 
   if(val >= i) {
-    if(i > 0.7 * NUM_LEDS) {
-      tmpColor[0] = 255;
-      tmpColor[1] = 0;
-      tmpColor[2] = 0;
+    if(i > 0.9 * NUM_LEDS) {
+      copyColor(highColor, tmpColor, 3);
 
-    } else if(i > 0.5 * NUM_LEDS) {
-      tmpColor[0] = 255;
-      tmpColor[1] = 255;
-      tmpColor[2] = 0;
+    } else if(i >= 0.5 * NUM_LEDS) {
+      copyColor(midColor, tmpColor, 3);
 
     } else {
-      tmpColor[0] = 0;
-      tmpColor[1] = 255;
-      tmpColor[2] = 0;
+      copyColor(lowColor, tmpColor, 3);
     }
 
   } else {
@@ -105,20 +161,14 @@ int* getColor(int val, int i){
   int *tmpColor = new int[3];
 
   if(val >= i) {
-    if(val > 0.7 * NUM_LEDS) {
-      tmpColor[0] = 255;
-      tmpColor[1] = 0;
-      tmpColor[2] = 0;
+    if(val > 0.9 * NUM_LEDS) {
+      copyColor(highColor, tmpColor, 3);
 
-    } else if(val > 0.5 * NUM_LEDS) {
-      tmpColor[0] = 255;
-      tmpColor[1] = 255;
-      tmpColor[2] = 0;
+    } else if(val >= 0.5 * NUM_LEDS) {
+      copyColor(midColor, tmpColor, 3);
 
     } else {
-      tmpColor[0] = 0;
-      tmpColor[1] = 255;
-      tmpColor[2] = 0;
+      copyColor(lowColor, tmpColor, 3);
     }
 
   } else {
