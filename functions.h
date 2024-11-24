@@ -54,20 +54,13 @@ int translateLeftChannel(int val){
 
 int getAnalogIN(int pin){
   int tmp = 0;
-  int cnt = 0;
 
   for(int i = 0; i < NUMREADS; i++) {
     int curr = analogRead(pin);
-
-    // Count only positive values, because music is AC
-    // and calc the middle
-    if(curr >0) {
-      tmp += curr;
-      cnt++;
-    }
+    if(curr > tmp) tmp = curr;
   }
 
-  return tmp / cnt;
+  return tmp;
 }
 
 void setLeds(int leftVal, int rightVal){
