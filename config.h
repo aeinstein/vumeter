@@ -35,8 +35,11 @@
 // delay per loop, default 5ms
 #define DELAY_MS 20
 
+// input calibration
 #define AMPLIFY 2.5f
 
+// Install poti, for onthefly calibration
+//#define CALIBRATION_POTI A3
 
 // led stripe modes
 #define DUAL 1

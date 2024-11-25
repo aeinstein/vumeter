@@ -7,6 +7,10 @@ void setup() {
   Serial.begin(57600);           //  setup serial
   pinMode(LED_DATA_LEFT, OUTPUT);
 
+#ifndef CALIBRATION_POTI
+  amplifyFactor = AMPLIFY;
+#endif
+
 #ifdef STEREO
   Serial.println("Stereo Mode");
 
@@ -26,7 +30,6 @@ void setup() {
   Serial.println("Peak Indicator");
 #endif
 
-
   Serial.println("led mapping");
 
   for(int i = 0; i < NUM_LEDS; i++){
@@ -40,10 +43,15 @@ void setup() {
 }
 
 void loop() {
-  leftVal = getAnalogIN(Left_IN) * NUM_LEDS / 1024;  // read the input pin
+  leftVal = map(getAnalogIN(Left_IN) * amplifyFactor, 0, 1024, 0, NUM_LEDS);  // read the input pin
 
 #ifdef STEREO
-  rightVal = getAnalogIN(Right_IN) * NUM_LEDS / 1024;  // read the input pin
+  rightVal = map(getAnalogIN(Right_IN) * amplifyFactor, 0, 1024, 0, NUM_LEDS);  // read the input pin
+#endif
+
+
+#ifdef CALIBRATION_POTI
+  amplifiyFactor = map(getAnalogIN(CALIBRATION_POTI), 0, 1024, 1, 3);
 #endif
 
   if(leftVal > leftCurrent) leftCurrent = leftVal;

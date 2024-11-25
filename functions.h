@@ -9,6 +9,9 @@ float rightCurrent = 0;
 float leftPeak = 0;
 float rightPeak = 0;
 
+float amplifyFactor;
+
+
 #if MODE == DUAL
   Adafruit_NeoPixel pixels_left = Adafruit_NeoPixel(NUM_LEDS, LED_DATA_LEFT, NEO_GRB + NEO_KHZ800);
 
@@ -56,11 +59,9 @@ int getAnalogIN(int pin){
   int tmp = 0;
 
   for(int i = 0; i < NUMREADS; i++) {
-    int curr = analogRead(pin) * AMPLIFY;
+    int curr = analogRead(pin);
     if(curr > tmp) tmp = curr;
   }
-
-  if(tmp > 1024) tmp = 1024;    // Fix Maxvalue
 
   return tmp;
 }
