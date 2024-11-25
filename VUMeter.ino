@@ -26,7 +26,8 @@ void setup() {
   Serial.println("Peak Indicator");
 #endif
 
-  Serial.println("right channel mapping");
+
+  Serial.println("led mapping");
 
   for(int i = 0; i < NUM_LEDS; i++){
     Serial.print(i, DEC);
@@ -49,8 +50,12 @@ void loop() {
   if(rightVal > rightCurrent) rightCurrent = rightVal;
 
 #ifdef PEAK_INDICATOR
-	if(leftVal >= leftPeak) leftPeak = leftVal + 1.5f;   // +1 so indicator stays above level and +0.5 prevent flickering
-	if(rightVal >= rightPeak) rightPeak = rightVal + 1.5f;
+	if(leftVal >= leftPeak) leftPeak = leftVal + 0.5f;   // +1 so indicator stays above level and +0.5 prevent flickering
+	if(rightVal >= rightPeak) rightPeak = rightVal + 0.5f;
+
+  // ensure to not exceed channel
+  if(leftPeak > NUM_LEDS -1) leftPeak = NUM_LEDS -1;
+  if(rightPeak > NUM_LEDS -1) rightPeak = NUM_LEDS -1;
 #endif
 
   setLeds(leftCurrent, rightCurrent);
@@ -61,7 +66,7 @@ void loop() {
   if(rightCurrent > 0) rightCurrent -= CHANNEL_DECAY;
 
 #ifdef PEAK_INDICATOR
-  if(leftVal + 1.5f < leftPeak && leftPeak > 0) leftPeak -= PEAK_DECAY;
-  if(rightVal + 1.5f < rightPeak && rightPeak > 0) rightPeak -= PEAK_DECAY;
+  if(leftVal + 0.5f < leftPeak && leftPeak > 0) leftPeak -= PEAK_DECAY;
+  if(rightVal + 0.5f < rightPeak && rightPeak > 0) rightPeak -= PEAK_DECAY;
 #endif
 }

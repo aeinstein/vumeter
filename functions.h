@@ -56,9 +56,11 @@ int getAnalogIN(int pin){
   int tmp = 0;
 
   for(int i = 0; i < NUMREADS; i++) {
-    int curr = analogRead(pin);
+    int curr = analogRead(pin) * AMPLIFY;
     if(curr > tmp) tmp = curr;
   }
+
+  if(tmp > 1024) tmp = 1024;    // Fix Maxvalue
 
   return tmp;
 }
@@ -121,8 +123,8 @@ void setLeds(int leftVal, int rightVal){
   #endif
 }
 
-void copyColor(int* src, int* dst, int len) {
-    for (int i = 0; i < len; i++) *dst++ = *src++;
+void copyColor(int* src, int* dst) {
+    for (int i = 0; i < 3; i++) *dst++ = *src++;
 }
 
 // Led Colors remain
@@ -131,13 +133,13 @@ int* getColor2(int val, int i){
 
   if(val >= i) {
     if(i > 0.9 * NUM_LEDS) {
-      copyColor(highColor, tmpColor, 3);
+      copyColor(highColor, tmpColor);
 
     } else if(i >= 0.5 * NUM_LEDS) {
-      copyColor(midColor, tmpColor, 3);
+      copyColor(midColor, tmpColor);
 
     } else {
-      copyColor(lowColor, tmpColor, 3);
+      copyColor(lowColor, tmpColor);
     }
 
   } else {
@@ -155,13 +157,13 @@ int* getColor(int val, int i){
 
   if(val >= i) {
     if(val > 0.9 * NUM_LEDS) {
-      copyColor(highColor, tmpColor, 3);
+      copyColor(highColor, tmpColor);
 
     } else if(val >= 0.5 * NUM_LEDS) {
-      copyColor(midColor, tmpColor, 3);
+      copyColor(midColor, tmpColor);
 
     } else {
-      copyColor(lowColor, tmpColor, 3);
+      copyColor(lowColor, tmpColor);
     }
 
   } else {

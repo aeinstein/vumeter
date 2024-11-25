@@ -10,7 +10,7 @@
 #define LED_DATA_RIGHT 1
 
 // Number of leds per channel
-#define NUM_LEDS 14
+#define NUM_LEDS 28
 
 // 10%
 #define BRIGHTNESS 0.1f
@@ -19,13 +19,13 @@
 #define GLOWNESS 0
 
 // Use Stereo input. If mono then only left channel is used
-#define STEREO
+//#define STEREO
 
 // Number of analog probes
 #define NUMREADS 10
 
 // momentum of channel value
-#define CHANNEL_DECAY 0.3f
+#define CHANNEL_DECAY 0.5f
 
 // Peak, default decay 0.05f
 #define PEAK_INDICATOR
@@ -35,6 +35,8 @@
 // delay per loop, default 5ms
 #define DELAY_MS 20
 
+#define AMPLIFY 2.5f
+
 
 // led stripe modes
 #define DUAL 1
@@ -42,7 +44,7 @@
 #define MIRROR 3
 #define FOLDED 4
 
-#define MODE FOLDED
+#define MODE STRIPPED
 
 int lowColor[] = {   0, 255,   0};
 int midColor[] = {   0,   0, 255};
