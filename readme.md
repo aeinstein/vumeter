@@ -10,6 +10,7 @@ Fast and dirty VU-Meter with NeoPixel LedStrips and teensy lc for my home DJ Des
 * build for [teensy lc](https://www.pjrc.com/teensy/teensyLC.html)
 * compatibel with all arduino boards
 * compatibel with all neopixel strips
+* Config saved in eeprom
 
 
 ## Example Setup with Keystone Modules
@@ -124,3 +125,4 @@ int highColor[] ={ 255,   0,   0};
 ## Upcoming
 * more Color effects
 * trimmer for calibration
+* OLED für Configuration

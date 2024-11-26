@@ -1,4 +1,5 @@
 #include "config.h"
+#include "store.h"
 
 int leftVal = 0;
 int rightVal = 0;
@@ -69,7 +70,7 @@ int getAnalogIN(int pin){
 void setLeds(int leftVal, int rightVal){
   int *color;
 
-  for(int i = 0; i < NUM_LEDS; i++){
+  for(unsigned int i = 0; i < NUM_LEDS; i++){
       color = getColor2(leftVal, i);
 
       pixels_left.setPixelColor(translateLeftChannel(i), pixels_left.Color(color[0] * BRIGHTNESS, color[1] * BRIGHTNESS, color[2] * BRIGHTNESS));

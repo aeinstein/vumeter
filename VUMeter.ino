@@ -7,51 +7,105 @@ void setup() {
   Serial.begin(57600);           //  setup serial
   pinMode(LED_DATA_LEFT, OUTPUT);
 
-#ifndef CALIBRATION_POTI
-  amplifyFactor = AMPLIFY;
-#endif
+  #ifdef STEREO
+    #if MODE == DUAL
+      pinMode(LED_DATA_RIGHT, OUTPUT);
+    #endif
+  #endif
 
-#ifdef STEREO
-  Serial.println("Stereo Mode");
+  // For Debug only
+  //dumpConfig();
+  //saveSettings();
+
+
+  if(hasStoredConfig()) {
+  	Serial.println("load stored values");
+  	loadSettings();
+
+  } else {
+    Serial.println("save initial config");
+    saveSettings();
+  }
+
+  dumpConfig();
+}
+
+void dumpConfig(){
+  Serial.println("current Config");
+  Serial.print("AMPLIFY: ");
+  Serial.println(AMPLIFY, 5);
+
+  Serial.print("CHANNEL_DECAY: ");
+  Serial.println(CHANNEL_DECAY, 5);
+
+  #ifdef PEAK_INDICATOR
+    Serial.println("Peak Indicator");
+    Serial.print("PEAK_DECAY: ");
+    Serial.println(PEAK_DECAY, 5);
+  #endif
+
+  #ifdef STEREO
+    Serial.println("Stereo");
+  #endif
+
+  #ifndef STEREO
+    Serial.println("Mono");
+  #endif
 
   #if MODE == DUAL
-    pinMode(LED_DATA_RIGHT, OUTPUT);
     Serial.println("2 Data out channels");
+    Serial.println("Dual mode");
+
   #else
     Serial.println("1 Data out channel");
+
+    #if MODE == STRIPPED
+      Serial.println("Stripped mode");
+    #endif
+
+    #if MODE == MIRROR
+      Serial.println("Mirror mode");
+    #endif
+
+    #if MODE == FOLDED
+      Serial.println("Folded mode");
+    #endif
   #endif
-#endif
 
-#ifndef STEREO
-  Serial.println("Mono Mode");
-#endif
+  Serial.print("Number of leds: ");
+  Serial.println(NUM_LEDS, DEC);
 
-#ifdef PEAK_INDICATOR
-  Serial.println("Peak Indicator");
-#endif
+  Serial.print("BRIGHTNESS: ");
+  Serial.println(BRIGHTNESS, 5);
+
+  Serial.print("GLOWNESS: ");
+  Serial.println(GLOWNESS, 5);
 
   Serial.println("led mapping");
 
-  for(int i = 0; i < NUM_LEDS; i++){
+  for(unsigned int i = 0; i < NUM_LEDS; i++){
     Serial.print(i, DEC);
     Serial.print(" -> left ");
     Serial.print(translateLeftChannel(i), DEC); 
-    Serial.print(" -> right ");
-    Serial.print(translateRightChannel(i), DEC);
+
+    #ifdef STEREO
+      Serial.print(" -> right ");
+      Serial.print(translateRightChannel(i), DEC);
+    #endif
+
     Serial.println("");
   }
 }
 
 void loop() {
-  leftVal = map(getAnalogIN(Left_IN) * amplifyFactor, 0, 1024, 0, NUM_LEDS);  // read the input pin
-
-#ifdef STEREO
-  rightVal = map(getAnalogIN(Right_IN) * amplifyFactor, 0, 1024, 0, NUM_LEDS);  // read the input pin
+#ifdef CALIBRATION_POTI
+  AMPLIFY = map(getAnalogIN(CALIBRATION_POTI), 0, 1024, 1, 3);
 #endif
 
+  leftVal = map(getAnalogIN(Left_IN) * AMPLIFY, 0, 1024, 0, NUM_LEDS);  // read the input pin
 
-#ifdef CALIBRATION_POTI
-  amplifiyFactor = map(getAnalogIN(CALIBRATION_POTI), 0, 1024, 1, 3);
+#ifdef STEREO
+  rightVal = map(getAnalogIN(Right_IN) * AMPLIFY, 0, 1024, 0, NUM_LEDS);  // read the input pin
 #endif
 
   if(leftVal > leftCurrent) leftCurrent = leftVal;
