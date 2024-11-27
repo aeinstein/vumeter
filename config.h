@@ -34,6 +34,7 @@
 #define PEAK_INDICATOR
 
 // Default Config Values on first Start
+// These are editable on the fly
 
 // Number of leds per channel
 unsigned int NUM_LEDS = 14;

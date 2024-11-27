@@ -11,6 +11,7 @@ Fast and dirty VU-Meter with NeoPixel LedStrips and teensy lc for my home DJ Des
 * compatibel with all arduino boards
 * compatibel with all neopixel strips
 * Config saved in eeprom
+* Serial Console for on the fly changes
 
 
 ## Example Setup with Keystone Modules
@@ -75,6 +76,10 @@ Stripped   Mirror  Folded
 
 ## Config Options
 ```
+// Hardware Config
+// Use Stereo input. If mono then only left channel is used
+#define STEREO
+
 // Analog in pins
 #define Left_IN A1
 #define Right_IN A2
@@ -83,43 +88,52 @@ Stripped   Mirror  Folded
 #define LED_DATA_LEFT 2
 #define LED_DATA_RIGHT 1
 
-// Number of leds per channel
-#define NUM_LEDS 14
-
-// 10%
-#define BRIGHTNESS 0.1f
-
-// idle color
-#define GLOWNESS 0
-
-// Use Stereo input. If mono then only left channel is used
-#define STEREO
-
-// Number of analog probes
-#define NUMREADS 10
-
-// momentum of channel value
-#define CHANNEL_DECAY 0.3f
-
-// Peak, default decay 0.05f
-#define PEAK_INDICATOR
-#define INDICATOR_STYLE 1
-#define PEAK_DECAY 0.1f
-
-// delay per loop, default 5ms
-#define DELAY_MS 20
-
 // led stripe modes
 #define DUAL 1
 #define STRIPPED 2
 #define MIRROR 3
 #define FOLDED 4
 
-#define MODE FOLDED
+#define MODE STRIPPED
 
-int lowColor[] = {   0, 255,   0};
-int midColor[] = {   0,   0, 255};
-int highColor[] ={ 255,   0,   0};
+// Install poti, for onthefly calibration
+//#define CALIBRATION_POTI A3
+
+// delay per loop, default 5ms
+#define DELAY_MS 20
+
+// Number of analog probes
+#define NUMREADS 20
+
+// Peak indicator
+#define PEAK_INDICATOR
+
+// Default Config Values on first Start
+// These are editable on the fly
+
+// Number of leds per channel
+unsigned int NUM_LEDS = 14;
+
+// 10%
+float BRIGHTNESS = 0.1f;
+
+// idle color
+//unsigned int GLOWNESS = 0;
+unsigned long GLOWNESS = 0x000000;
+
+// decay of channel value
+float CHANNEL_DECAY = 0.5f;
+
+// Peak, default decay 0.05f
+float PEAK_DECAY = 0.1f;
+
+// input calibration
+float AMPLIFY = 2.5f;
+
+// The Colors
+unsigned long LC = 0x00FF00;
+unsigned long MC = 0x0000FF;
+unsigned long HC = 0xFF0000;
 ```
 
 ## Upcoming
