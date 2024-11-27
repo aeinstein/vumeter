@@ -136,7 +136,32 @@ unsigned long MC = 0x0000FF;
 unsigned long HC = 0xFF0000;
 ```
 
+## Serial Console
+### Commands:
+* load
+* save
+* dump
+* set CONFIGVAR VALUE
+
+### Configvars
+* brightness
+* glowness
+* peak_decay
+* channel_decay
+* num_leds
+* lowcolor
+* midcolor
+* highcolor
+
+### Example
+```
+set brightness 0.1
+set midcolor 0000FF
+save
+```
+
 ## Upcoming
 * more Color effects
 * trimmer for calibration
 * OLED für Configuration
+* little filter circuit
