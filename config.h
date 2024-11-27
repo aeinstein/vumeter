@@ -42,7 +42,8 @@ unsigned int NUM_LEDS = 14;
 float BRIGHTNESS = 0.1f;
 
 // idle color
-unsigned int GLOWNESS = 0;
+//unsigned int GLOWNESS = 0;
+unsigned long GLOWNESS = 0x000000;
 
 // decay of channel value
 float CHANNEL_DECAY = 0.5f;
@@ -54,8 +55,8 @@ float PEAK_DECAY = 0.1f;
 float AMPLIFY = 2.5f;
 
 // The Colors
-int lowColor[] = {   0, 255,   0};
-int midColor[] = {   0,   0, 255};
-int highColor[] ={ 255,   0,   0};
+unsigned long LC = 0x00FF00;
+unsigned long MC = 0x0000FF;
+unsigned long HC = 0xFF0000;
 
 #endif

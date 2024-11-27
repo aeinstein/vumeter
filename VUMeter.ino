@@ -1,6 +1,7 @@
 #include <Adafruit_NeoPixel.h>
 #include "config.h"
 #include "functions.h"
+#include "console.h"
 
 
 void setup() {
@@ -13,99 +14,26 @@ void setup() {
     #endif
   #endif
 
-  // For Debug only
-  //dumpConfig();
-  //saveSettings();
-
-
-  if(hasStoredConfig()) {
-  	Serial.println("load stored values");
-  	loadSettings();
-
-  } else {
-    Serial.println("save initial config");
-    saveSettings();
-  }
+  // If no config, write one
+  if(!loadSettings()) saveSettings();
 
   dumpConfig();
+
+  cli_init();
 }
 
-void dumpConfig(){
-  Serial.println("current Config");
-  Serial.print("AMPLIFY: ");
-  Serial.println(AMPLIFY, 5);
-
-  Serial.print("CHANNEL_DECAY: ");
-  Serial.println(CHANNEL_DECAY, 5);
-
-  #ifdef PEAK_INDICATOR
-    Serial.println("Peak Indicator");
-    Serial.print("PEAK_DECAY: ");
-    Serial.println(PEAK_DECAY, 5);
-  #endif
-
-  #ifdef STEREO
-    Serial.println("Stereo");
-  #endif
-
-  #ifndef STEREO
-    Serial.println("Mono");
-  #endif
-
-  #if MODE == DUAL
-    Serial.println("2 Data out channels");
-    Serial.println("Dual mode");
-
-  #else
-    Serial.println("1 Data out channel");
-
-    #if MODE == STRIPPED
-      Serial.println("Stripped mode");
-    #endif
-
-    #if MODE == MIRROR
-      Serial.println("Mirror mode");
-    #endif
-
-    #if MODE == FOLDED
-      Serial.println("Folded mode");
-    #endif
-  #endif
-
-  Serial.print("Number of leds: ");
-  Serial.println(NUM_LEDS, DEC);
-
-  Serial.print("BRIGHTNESS: ");
-  Serial.println(BRIGHTNESS, 5);
-
-  Serial.print("GLOWNESS: ");
-  Serial.println(GLOWNESS, 5);
-
-  Serial.println("led mapping");
-
-  for(unsigned int i = 0; i < NUM_LEDS; i++){
-    Serial.print(i, DEC);
-    Serial.print(" -> left ");
-    Serial.print(translateLeftChannel(i), DEC); 
-
-    #ifdef STEREO
-      Serial.print(" -> right ");
-      Serial.print(translateRightChannel(i), DEC);
-    #endif
-
-    Serial.println("");
-  }
-}
 
 void loop() {
 #ifdef CALIBRATION_POTI
   AMPLIFY = map(getAnalogIN(CALIBRATION_POTI), 0, 1024, 1, 3);
 #endif
 
-  leftVal = map(getAnalogIN(Left_IN) * AMPLIFY, 0, 1024, 0, NUM_LEDS);  // read the input pin
+  getAnalogIN(&leftVal, &rightVal);
+
+  leftVal = map(leftVal * AMPLIFY, 0, 1024, 0, NUM_LEDS);  // read the input pin
 
 #ifdef STEREO
-  rightVal = map(getAnalogIN(Right_IN) * AMPLIFY, 0, 1024, 0, NUM_LEDS);  // read the input pin
+  rightVal = map(rightVal * AMPLIFY, 0, 1024, 0, NUM_LEDS);  // read the input pin
 #endif
 
   if(leftVal > leftCurrent) leftCurrent = leftVal;
@@ -120,6 +48,8 @@ void loop() {
   if(rightPeak > NUM_LEDS -1) rightPeak = NUM_LEDS -1;
 #endif
 
+
+  my_cli();
   setLeds(leftCurrent, rightCurrent);
   delay(DELAY_MS);
 
@@ -131,4 +61,6 @@ void loop() {
   if(leftVal + 0.5f < leftPeak && leftPeak > 0) leftPeak -= PEAK_DECAY;
   if(rightVal + 0.5f < rightPeak && rightPeak > 0) rightPeak -= PEAK_DECAY;
 #endif
+
+  
 }

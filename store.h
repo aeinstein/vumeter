@@ -1,107 +1,111 @@
 #include <EEPROM.h>
 
-unsigned int writeFloatIntoEEPROM(int address, float number){
-  EEPROM.put(address, number);
-  return address +4;
-}
 
-unsigned int readFloatFromEEPROM(int address, float number){
-  EEPROM.get(address, number);
-  return address+4;
-}
+struct MyConfig {
+  #ifndef CALIBRATION_POTI
+    float AMPLIFY;        // 4
+  #endif
 
-unsigned int writeColorIntoEEPROM(int address, int color[]){
-  EEPROM.write(address++, color[0]);
-  EEPROM.write(address++, color[1]);
-  EEPROM.write(address++, color[2]);
-  return address +3;
-}
+  unsigned int NUM_LEDS;  // 2
+  unsigned long LC;       // 4
+  unsigned long MC;       // 4
+  unsigned long HC;       // 4
 
-unsigned int readColorFromEEPROM(int address, int color[]){
-	color[0] = EEPROM.read(address++);
-	color[1] = EEPROM.read(address++);
-	color[2] = EEPROM.read(address++);
-	return address +3;
-}
+  float CHANNEL_DECAY;    // 4
+  float PEAK_DECAY;       // 4
+  float BRIGHTNESS;       // 4
+  unsigned long GLOWNESS; // 4
+  char SIGNATURE[3];
+};
 
-unsigned int readIntFromEEPROM(int address, int number){
-  byte byte1 = EEPROM.read(address);
-  byte byte2 = EEPROM.read(address + 1);
-  number = (byte1 << 8) + byte2;
-  return address +2;
-}
-
-unsigned int writeIntIntoEEPROM(int address, int number){
-  byte byte1 = number >> 8;
-  byte byte2 = number & 0xFF;
-  EEPROM.write(address, byte1);
-  EEPROM.write(address + 1, byte2);
-
-  return address +2;
-}
-
-unsigned int writeUnsignedIntIntoEEPROM(int address, unsigned int number) {
-  EEPROM.write(address, number >> 8);
-  EEPROM.write(address + 1, number & 0xFF);
-  return address +2;
-}
-
-unsigned int readUnsignedIntFromEEPROM(int address, unsigned int number){
-  number = (EEPROM.read(address) << 8) + EEPROM.read(address + 1);
-  return address +2;
-}
-
-bool hasStoredConfig(){
-	if(EEPROM.read(39) == 77 && EEPROM.read(40) == 75) return true;
-	return false;
-}
 
 void saveSettings(){
   int addr = 0;
 
-  #ifndef CALIBRATION_POTI
-    addr = writeFloatIntoEEPROM(addr, AMPLIFY);
-  #endif
+  MyConfig config = {
+    #ifndef CALIBRATION_POTI
+      AMPLIFY,
+    #endif
+    NUM_LEDS,
+    LC,
+    MC,
+    HC,
+    CHANNEL_DECAY,
+    PEAK_DECAY,
+    BRIGHTNESS,
+    GLOWNESS,
+    "MKB"
+  };
 
-  addr = writeUnsignedIntIntoEEPROM(addr, NUM_LEDS);
-
-  addr = writeColorIntoEEPROM(addr, lowColor);
-  addr = writeColorIntoEEPROM(addr, midColor);
-  addr = writeColorIntoEEPROM(addr, highColor);
-
-  addr = writeFloatIntoEEPROM(addr, CHANNEL_DECAY);
-  addr = writeFloatIntoEEPROM(addr, PEAK_DECAY);
-  addr = writeFloatIntoEEPROM(addr, BRIGHTNESS);
-  addr = writeUnsignedIntIntoEEPROM(addr, GLOWNESS);
+  EEPROM.put(addr, config);
 
   Serial.print("config is ");
-  Serial.print(addr, DEC);
+  Serial.print(sizeof(MyConfig), DEC);
   Serial.println(" bytes");
-
-  // Config Signature
-  EEPROM.write(39, 77);
-  EEPROM.write(40, 75);
 }
 
-void loadSettings(){
+bool loadSettings(){
   int addr = 0;
 
-  #ifndef CALIBRATION_POTI
-    addr = readFloatFromEEPROM(addr, AMPLIFY);
-  #endif
+  MyConfig config;
 
-  addr = readUnsignedIntFromEEPROM(addr, NUM_LEDS);
-  addr = readColorFromEEPROM(addr, lowColor);
-  addr = readColorFromEEPROM(addr, midColor);
-  addr = readColorFromEEPROM(addr, highColor);
-
-  addr = readFloatFromEEPROM(addr, CHANNEL_DECAY);
-  addr = readFloatFromEEPROM(addr, PEAK_DECAY);
-  addr = readFloatFromEEPROM(addr, BRIGHTNESS);
-  
-  addr = readUnsignedIntFromEEPROM(addr, GLOWNESS);
+  EEPROM.get(addr, config);
 
   Serial.print("config read: ");
-  Serial.print(addr, DEC);
+  Serial.print(sizeof(MyConfig), DEC);
   Serial.println(" bytes");
+
+
+  Serial.print("Signature: ");
+  Serial.println(config.SIGNATURE);
+
+  if(strcmp(config.SIGNATURE, "MKB") == 0) {
+    #ifndef CALIBRATION_POTI
+      AMPLIFY = config.AMPLIFY;
+    #endif
+
+    NUM_LEDS = config.NUM_LEDS;
+    
+    Serial.print("NUM_LEDS: ");
+    Serial.println(NUM_LEDS, DEC);
+
+    LC = config.LC;
+    MC = config.MC;
+    HC = config.HC;
+
+    Serial.print("LC: ");
+    Serial.println(LC, HEX);
+
+    Serial.print("MC: ");
+    Serial.println(MC, HEX);
+
+    Serial.print("HC: ");
+    Serial.println(HC, HEX);
+
+    CHANNEL_DECAY = config.CHANNEL_DECAY;
+    PEAK_DECAY = config.PEAK_DECAY;
+    BRIGHTNESS = config.BRIGHTNESS;
+    GLOWNESS = config.GLOWNESS;
+
+    Serial.print("CHANNEL_DECAY: "); 
+    Serial.println(CHANNEL_DECAY, 3);
+
+    Serial.print("PEAK_DECAY: "); 
+    Serial.println(PEAK_DECAY, 3);
+
+    Serial.print("BRIGHTNESS: "); 
+    Serial.println(BRIGHTNESS, 3);
+
+    Serial.print("GLOWNESS: "); 
+    Serial.println(GLOWNESS, HEX);
+
+    return 1;
+
+  } else {
+    Serial.println("Signature not match");
+    return 0;
+  }
 }
+
+
+
