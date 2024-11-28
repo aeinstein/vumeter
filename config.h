@@ -6,8 +6,8 @@
 #define STEREO
 
 // Analog in pins
-#define Left_IN A1
-#define Right_IN A2
+#define Left_IN A2
+#define Right_IN A1
 
 // Data out pins
 #define LED_DATA_LEFT 2
@@ -25,7 +25,7 @@
 //#define CALIBRATION_POTI A3
 
 // delay per loop, default 5ms
-#define DELAY_MS 20
+#define DELAY_MS 5
 
 // Number of analog probes
 #define NUMREADS 20

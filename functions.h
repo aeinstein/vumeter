@@ -10,9 +10,6 @@ float rightCurrent = 0;
 float leftPeak = 0;
 float rightPeak = 0;
 
-float amplifyFactor;
-
-
 #if MODE == DUAL
   Adafruit_NeoPixel pixels_left = Adafruit_NeoPixel(NUM_LEDS, LED_DATA_LEFT, NEO_GRB + NEO_KHZ800);
 
@@ -32,6 +29,10 @@ float amplifyFactor;
 
 unsigned long getColor(int val, int i);
 unsigned long getColor2(int val, int i);
+unsigned long getColor3(float val, int i);
+
+float clamp(float x, float lowerlimit = 0.0f, float upperlimit = 1.0f);
+float smootherstep(float edge0, float edge1, float x);
 
 int translateRightChannel(int val){
   #if MODE == DUAL  
@@ -107,7 +108,7 @@ void setLeds(int leftVal, int rightVal){
   }
 
   #ifdef PEAK_INDICATOR
-  	color = getColor((int)leftPeak, (int)leftPeak);
+  	color = getColor3(leftPeak, (int)leftPeak);
 
     r = (color >> 16) & 0xff;
     g = (color >> 8) & 0xff;
@@ -122,7 +123,7 @@ void setLeds(int leftVal, int rightVal){
 
   #ifdef STEREO
     #ifdef PEAK_INDICATOR
-      color = getColor((int)rightPeak, (int)rightPeak);
+      color = getColor3(rightPeak, (int)rightPeak);
 
       r = (color >> 16) & 0xff;
       g = (color >> 8) & 0xff;
@@ -142,11 +143,6 @@ void setLeds(int leftVal, int rightVal){
     pixels_right.show();
   #endif
 }
-
-/*
-void copyColor(int* src, int* dst) {
-    for (int i = 0; i < 3; i++) *dst++ = *src++;
-}*/
 
 // Led Colors remain
 unsigned long getColor2(int val, int i){
@@ -177,6 +173,36 @@ unsigned long getColor(int val, int i){
       return LC;
     }
   } 
+
+  return GLOWNESS;
+}
+
+unsigned long getColor3(float val, int i){
+  if(val >= i) {
+    if(val > 0.9 * NUM_LEDS) {
+      return HC;
+
+    } else if(val >= 0.5 * NUM_LEDS) {
+      return MC;
+
+    } else {
+      return LC;
+    }
+    
+  } else if(val +1 >= i){  // blend pixel above
+    float diff = val -i;
+
+    byte r = (HC >> 16) & 0xff;
+    byte g = (HC >> 8) & 0xff;
+    byte b = (HC) & 0xff;
+
+    r = r * diff;
+    g = g * diff;
+    b = b * diff;
+
+    return (r << 16) + (g << 8) + b;
+
+  }
 
   return GLOWNESS;
 }
@@ -257,3 +283,23 @@ void dumpConfig(){
   Serial.print("High Color: ");
   Serial.println(HC, HEX);
 }
+
+float smootherstep(float edge0, float edge1, float x) {
+  // Scale, and clamp x to 0..1 range
+  x = clamp((x - edge0) / (edge1 - edge0), edge0, edge1);
+
+  return x * x * x * (x * (6.0f * x - 15.0f) + 10.0f);
+}
+
+float clamp(float x, float lowerlimit = 0.0f, float upperlimit = 1.0f) {
+  if (x < lowerlimit) return lowerlimit;
+  if (x > upperlimit) return upperlimit;
+  return x;
+}
+
+float compress(float in, float edge1 = 1, float order = 2){
+  in = in / edge1;
+  float out = (-pow(1 -in, order)) +1;
+  return out * edge1;
+}
+

@@ -3,7 +3,6 @@
 #include "functions.h"
 #include "console.h"
 
-
 void setup() {
   Serial.begin(57600);           //  setup serial
   pinMode(LED_DATA_LEFT, OUTPUT);
@@ -31,9 +30,11 @@ void loop() {
   getAnalogIN(&leftVal, &rightVal);
 
   leftVal = map(leftVal * AMPLIFY, 0, 1024, 0, NUM_LEDS);  // read the input pin
+  leftVal = compress(leftVal, NUM_LEDS, 3);
 
 #ifdef STEREO
   rightVal = map(rightVal * AMPLIFY, 0, 1024, 0, NUM_LEDS);  // read the input pin
+  rightVal = compress(rightVal, NUM_LEDS, 3);
 #endif
 
   if(leftVal > leftCurrent) leftCurrent = leftVal;
