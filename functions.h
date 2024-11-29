@@ -31,9 +31,6 @@ unsigned long getColor(int val, int i);
 unsigned long getColor2(int val, int i);
 unsigned long getColor3(float val, int i);
 
-float clamp(float x, float lowerlimit = 0.0f, float upperlimit = 1.0f);
-float smootherstep(float edge0, float edge1, float x);
-
 int translateRightChannel(int val){
   #if MODE == DUAL  
     return val;
@@ -74,7 +71,7 @@ void getAnalogIN(int *left, int *right){
 
     delayMicroseconds(100); // Max freq is 10kHz    1/10000 = 0.1ms. 20 reads * 0.1ms = 2ms = 500hz 
     // so freq is 500hz - 10khz
-    // the very pour fourier transformation ;-)
+    // the very poor fourier transformation ;-)
   }
 }
 
@@ -284,20 +281,8 @@ void dumpConfig(){
   Serial.println(HC, HEX);
 }
 
-float smootherstep(float edge0, float edge1, float x) {
-  // Scale, and clamp x to 0..1 range
-  x = clamp((x - edge0) / (edge1 - edge0), edge0, edge1);
-
-  return x * x * x * (x * (6.0f * x - 15.0f) + 10.0f);
-}
-
-float clamp(float x, float lowerlimit = 0.0f, float upperlimit = 1.0f) {
-  if (x < lowerlimit) return lowerlimit;
-  if (x > upperlimit) return upperlimit;
-  return x;
-}
-
 float compress(float in, float edge1 = 1, float order = 2){
+  // poor mans compressor
   in = in / edge1;
   float out = (-pow(1 -in, order)) +1;
   return out * edge1;
