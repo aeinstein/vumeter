@@ -19,10 +19,8 @@
 #define MIRROR 3
 #define FOLDED 4
 
-#define MODE STRIPPED
-
 // Install poti, for onthefly calibration
-//#define CALIBRATION_POTI A3
+#define CALIBRATION_POTI A3
 
 // delay per loop, default 5ms
 #define DELAY_MS 5
@@ -31,10 +29,13 @@
 #define NUMREADS 20
 
 // Peak indicator
-#define PEAK_INDICATOR
+bool PEAK_INDICATOR = true;
 
 // Default Config Values on first Start
 // These are editable on the fly
+
+// led stripe mode
+byte MODE = STRIPPED;
 
 // Number of leds per channel
 unsigned int NUM_LEDS = 14;

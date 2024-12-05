@@ -13,8 +13,10 @@ struct MyConfig {
 
   float CHANNEL_DECAY;    // 4
   float PEAK_DECAY;       // 4
+  bool PEAK_INDICATOR;    // 1
   float BRIGHTNESS;       // 4
   unsigned long GLOWNESS; // 4
+  byte MODE;              // 1
   char SIGNATURE[3];
 };
 
@@ -32,8 +34,10 @@ void saveSettings(){
     HC,
     CHANNEL_DECAY,
     PEAK_DECAY,
+    PEAK_INDICATOR,
     BRIGHTNESS,
     GLOWNESS,
+    MODE,
     "MKB"
   };
 
@@ -84,14 +88,19 @@ bool loadSettings(){
 
     CHANNEL_DECAY = config.CHANNEL_DECAY;
     PEAK_DECAY = config.PEAK_DECAY;
+    PEAK_INDICATOR = config.PEAK_INDICATOR;
     BRIGHTNESS = config.BRIGHTNESS;
     GLOWNESS = config.GLOWNESS;
+    MODE = config.MODE;
 
     Serial.print("CHANNEL_DECAY: "); 
     Serial.println(CHANNEL_DECAY, 3);
 
     Serial.print("PEAK_DECAY: "); 
     Serial.println(PEAK_DECAY, 3);
+
+    Serial.print("PEAK_INDICATOR: "); 
+    Serial.println(PEAK_INDICATOR);
 
     Serial.print("BRIGHTNESS: "); 
     Serial.println(BRIGHTNESS, 3);

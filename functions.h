@@ -1,3 +1,4 @@
+#include <Adafruit_NeoPixel.h>
 #include "config.h"
 #include "store.h"
 
@@ -10,48 +11,58 @@ float rightCurrent = 0;
 float leftPeak = 0;
 float rightPeak = 0;
 
-#if MODE == DUAL
-  Adafruit_NeoPixel pixels_left = Adafruit_NeoPixel(NUM_LEDS, LED_DATA_LEFT, NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel pixels_left = Adafruit_NeoPixel(0, LED_DATA_LEFT, NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel pixels_right = Adafruit_NeoPixel(0, LED_DATA_RIGHT, NEO_GRB + NEO_KHZ800);
 
-  #ifdef STEREO
-    Adafruit_NeoPixel pixels_right = Adafruit_NeoPixel(NUM_LEDS, LED_DATA_RIGHT, NEO_GRB + NEO_KHZ800);
-  #endif
 
-#else
-  #ifdef STEREO
-    Adafruit_NeoPixel pixels_left = Adafruit_NeoPixel(NUM_LEDS *2, LED_DATA_LEFT, NEO_GRB + NEO_KHZ800);
-  #endif
+void initLeds(){
+  if(MODE == DUAL) {
+    pixels_left.updateLength(NUM_LEDS);
+    //pixels_left.setPin(LED_DATA_LEFT);
+    //Adafruit_NeoPixel pixels_left = Adafruit_NeoPixel(NUM_LEDS, LED_DATA_LEFT, NEO_GRB + NEO_KHZ800);
 
-  #ifndef STEREO
-    Adafruit_NeoPixel pixels_left = Adafruit_NeoPixel(NUM_LEDS, LED_DATA_LEFT, NEO_GRB + NEO_KHZ800);
-  #endif
-#endif
+    #ifdef STEREO
+      pixels_right.updateLength(NUM_LEDS);
+      pinMode(LED_DATA_RIGHT, OUTPUT);
+      //pixels_left.setPin(LED_DATA_RIGHT);
+      //Adafruit_NeoPixel pixels_right = Adafruit_NeoPixel(NUM_LEDS, LED_DATA_RIGHT, NEO_GRB + NEO_KHZ800);
+    #endif
+
+  } else {
+    #ifdef STEREO
+      pixels_left.updateLength(NUM_LEDS *2);
+      //pixels_left.setPin(LED_DATA_LEFT);
+      //Adafruit_NeoPixel pixels_left = Adafruit_NeoPixel(NUM_LEDS *2, LED_DATA_LEFT, NEO_GRB + NEO_KHZ800);
+    #endif
+
+    #ifndef STEREO
+      pixels_left.updateLength(NUM_LEDS);
+      //pixels_left.setPin(LED_DATA_LEFT);
+      //Adafruit_NeoPixel pixels_left = Adafruit_NeoPixel(NUM_LEDS, LED_DATA_LEFT, NEO_GRB + NEO_KHZ800);
+    #endif
+  }
+}
 
 unsigned long getColor(int val, int i);
 unsigned long getColor2(int val, int i);
 unsigned long getColor3(float val, int i);
 
 int translateRightChannel(int val){
-  #if MODE == DUAL  
-    return val;
-
-  #elif MODE == STRIPPED
-    return val + NUM_LEDS;
-
-  #elif MODE == MIRROR
-    return val + NUM_LEDS;
-
-  #else
-    return NUM_LEDS *2 - val -1;
-  #endif
+  switch(MODE) {
+    case DUAL:
+      return val;
+    case STRIPPED:
+      return val + NUM_LEDS;
+    case MIRROR:
+      return val + NUM_LEDS;
+    default:
+      return NUM_LEDS *2 - val -1;
+  }
 }
 
 int translateLeftChannel(int val){
-  #if MODE == MIRROR
-    return NUM_LEDS - val -1;
-  #else
-    return val;
-  #endif
+  if(MODE == MIRROR) return NUM_LEDS - val -1;
+  return val;
 }
 
 void getAnalogIN(int *left, int *right){
@@ -95,12 +106,8 @@ void setLeds(int leftVal, int rightVal){
         g = (color >> 8) & 0xff;
         b = (color) & 0xff;
 
-        #if MODE == DUAL  
-          pixels_right.setPixelColor(translateRightChannel(i), pixels_right.Color(r * BRIGHTNESS, g * BRIGHTNESS, b * BRIGHTNESS));
-
-        #else
-          pixels_left.setPixelColor(translateRightChannel(i), pixels_left.Color(r * BRIGHTNESS, g * BRIGHTNESS, b * BRIGHTNESS));
-        #endif
+        if(MODE == DUAL) pixels_right.setPixelColor(translateRightChannel(i), pixels_right.Color(r * BRIGHTNESS, g * BRIGHTNESS, b * BRIGHTNESS));
+        else pixels_left.setPixelColor(translateRightChannel(i), pixels_left.Color(r * BRIGHTNESS, g * BRIGHTNESS, b * BRIGHTNESS));
       #endif
   }
 
@@ -111,34 +118,26 @@ void setLeds(int leftVal, int rightVal){
     g = (color >> 8) & 0xff;
     b = (color) & 0xff;
 
-    #if MODE == MIRROR
-  	  pixels_left.setPixelColor(NUM_LEDS - (int)leftPeak, pixels_left.Color(r * BRIGHTNESS, g * BRIGHTNESS, b * BRIGHTNESS));
-    #else
-      pixels_left.setPixelColor((int)leftPeak, pixels_left.Color(r * BRIGHTNESS, g * BRIGHTNESS, b * BRIGHTNESS));
-    #endif
+    if(MODE == MIRROR) pixels_left.setPixelColor(NUM_LEDS - (int)leftPeak, pixels_left.Color(r * BRIGHTNESS, g * BRIGHTNESS, b * BRIGHTNESS));
+    else pixels_left.setPixelColor((int)leftPeak, pixels_left.Color(r * BRIGHTNESS, g * BRIGHTNESS, b * BRIGHTNESS));
   #endif
 
   #ifdef STEREO
-    #ifdef PEAK_INDICATOR
+    if(PEAK_INDICATOR) {
       color = getColor3(rightPeak, (int)rightPeak);
 
       r = (color >> 16) & 0xff;
       g = (color >> 8) & 0xff;
       b = (color) & 0xff;
 
-      #if MODE == DUAL  
-        pixels_right.setPixelColor(translateRightChannel((int)rightPeak), pixels_right.Color(r * BRIGHTNESS, g * BRIGHTNESS, b * BRIGHTNESS));
-      #else
-        pixels_left.setPixelColor(translateRightChannel((int)rightPeak), pixels_left.Color(r * BRIGHTNESS, g * BRIGHTNESS, b * BRIGHTNESS));
-      #endif
-    #endif
+      if(MODE == DUAL) pixels_right.setPixelColor(translateRightChannel((int)rightPeak), pixels_right.Color(r * BRIGHTNESS, g * BRIGHTNESS, b * BRIGHTNESS));
+      else pixels_left.setPixelColor(translateRightChannel((int)rightPeak), pixels_left.Color(r * BRIGHTNESS, g * BRIGHTNESS, b * BRIGHTNESS));
+    }
   #endif
 
   pixels_left.show();
 
-  #if MODE == DUAL
-    pixels_right.show();
-  #endif
+  if(MODE == DUAL) pixels_right.show();
 }
 
 // Led Colors remain

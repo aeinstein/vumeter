@@ -1,4 +1,3 @@
-#include <Adafruit_NeoPixel.h>
 #include "config.h"
 #include "functions.h"
 #include "console.h"
@@ -7,24 +6,26 @@ void setup() {
   Serial.begin(57600);           //  setup serial
   pinMode(LED_DATA_LEFT, OUTPUT);
 
-  #ifdef STEREO
-    #if MODE == DUAL
-      pinMode(LED_DATA_RIGHT, OUTPUT);
-    #endif
-  #endif
-
   // If no config, write one
   if(!loadSettings()) saveSettings();
 
   dumpConfig();
-
+  initLeds();
   cli_init();
 }
 
 
 void loop() {
 #ifdef CALIBRATION_POTI
-  AMPLIFY = map(getAnalogIN(CALIBRATION_POTI), 0, 1024, 1, 3);
+  float tmpAmp = analogRead(CALIBRATION_POTI) / 400.0f;
+
+  if(AMPLIFY > tmpAmp + 0.1 
+    || AMPLIFY < tmpAmp - 0.1
+  ) {
+    AMPLIFY = tmpAmp;
+    Serial.print("Amp: ");
+    Serial.println(AMPLIFY, 3);
+  }
 #endif
 
   getAnalogIN(&leftVal, &rightVal);
