@@ -14,6 +14,15 @@ int cmd_save();
 int cmd_load();
 int cmd_set();
 
+void help_help();
+void help_load();
+void help_save();
+void help_set();
+void help_set_amplify();
+void help_set_brightness();
+void help_set_mode();
+
+
 //List of functions pointers corresponding to each command
 int (*commands_func[])(){
     &cmd_help,
@@ -43,6 +52,8 @@ const char *set_args[] = {
 	"lowcolor",
   "midcolor",
   "highcolor",
+  "peak_indicator",
+  "mode",
 };
 
 void parse_line();
@@ -53,40 +64,42 @@ int num_commands = sizeof(commands_str) / sizeof(char *);
 int num_set_args = sizeof(set_args) / sizeof(char *);
 
 void cli_init(){
-    Serial.println("VU Meter Console.");
-    Serial.println("Type \"help\" to see a list of commands.");
+  Serial.println("VU Meter Console.");
+  Serial.println("Type \"help\" to see a list of commands.");
 }
 
 
 void my_cli(){
-    if(!read_line()) return;
-    if(!error_flag) parse_line();
-    if(!error_flag) execute();
+  if(!read_line()) return;
+  if(!error_flag) parse_line();
+  if(!error_flag) execute();
 
-    memset(line, 0, LINE_BUF_SIZE);
-    memset(args, 0, sizeof(args[0][0]) * MAX_NUM_ARGS * ARG_BUF_SIZE);
+  memset(line, 0, LINE_BUF_SIZE);
+  memset(args, 0, sizeof(args[0][0]) * MAX_NUM_ARGS * ARG_BUF_SIZE);
 
-    error_flag = false;
+  error_flag = false;
 }
 
 bool read_line(){
-    String line_string;
+  String line_string;
 
-    while(!Serial.available()) return 0;
+  while(!Serial.available()) return 0;
 
-    if(Serial.available()){
-        line_string = Serial.readStringUntil("\n");
+  if(Serial.available()){
+    line_string = Serial.readStringUntil("\n");
 
-        if(line_string.length() < LINE_BUF_SIZE){
-          line_string.toCharArray(line, LINE_BUF_SIZE);
-          Serial.println(line_string);
-          return 1;
+    if(line_string.length() < LINE_BUF_SIZE){
+      line_string.toCharArray(line, LINE_BUF_SIZE);
+      Serial.println(line_string);
+      return 1;
 
-        } else {
-          Serial.println("Input string too long.");
-          error_flag = true;
-        }
+    } else {
+      Serial.println("Input string too long.");
+      error_flag = true;
     }
+  }
+
+  return 0;
 }
 
 void parse_line(){
@@ -128,20 +141,36 @@ int execute(){
 
 int cmd_help(){
 	if(args[1] == NULL){
-		//help_help();
+		help_help();
 
 	} else if(strcmp(args[1], commands_str[0]) == 0){
-		//help_help();
+		help_help();
 
 	} else if(strcmp(args[1], commands_str[1]) == 0){
-		//help_led();
+		//help_dump();
 
 	} else if(strcmp(args[1], commands_str[2]) == 0){
-		//help_exit();
+		//help_save();
 
+  } else if(strcmp(args[1], commands_str[3]) == 0){
+		//help_load();
+
+  } else if(strcmp(args[1], commands_str[4]) == 0){
+    /*
+    if(strcmp(args[2], "amplify") == 0) help_set_amplify();
+    if(strcmp(args[2], "brightness") == 0) help_set_brightness();
+    if(strcmp(args[2], "mode") == 0) help_set_mode();
+    if(strcmp(args[2], "amplify") == 0) help_set_amplify();
+    if(strcmp(args[2], "brightness") == 0) help_set_brightness();
+    if(strcmp(args[2], "mode") == 0) help_set_mode();
+    if(strcmp(args[2], "amplify") == 0) help_set_amplify();
+    if(strcmp(args[2], "brightness") == 0) help_set_brightness();
+*/
 	} else{
-		//help_help();
+		help_help();
 	}
+
+  return 1;
 }
 
 int cmd_dump(){
@@ -224,7 +253,7 @@ int cmd_set(){
         CHANNEL_DECAY = atof(args[2]);
         Serial.println(CHANNEL_DECAY, 3);
         return 1;
-      } 
+      }
       break;
 
     case 5:
@@ -267,14 +296,79 @@ int cmd_set(){
       }
       break;
 
+    case 9:
+      Serial.print("setting peak indicator to: ");
+
+      if(strcmp(args[2], "on") == 0) {
+        Serial.println("on");
+        PEAK_INDICATOR = true;
+        return 1;
+
+      } else {
+        Serial.println("off");
+        PEAK_INDICATOR = false;
+        return 1;
+      }
+
+      break;
+
+    case 10:
+      Serial.print("setting mode to: ");
+
+      if(strcmp(args[2], "dual") == 0) {
+        Serial.println("Dual");
+        MODE = DUAL;
+
+      } else if(strcmp(args[2], "mirror") == 0) {
+        Serial.println("Mirror");
+        MODE = MIRROR;
+
+      } else if(strcmp(args[2], "stripped") == 0) {
+        Serial.println("Stripped");
+        MODE = STRIPPED;
+
+      } else {
+        Serial.println("Folded");
+        MODE = FOLDED;
+      }
+      return 1;
+
     default:
       Serial.print(args[1]);
       Serial.println("not recognized");
       break;
-	} 
+	}
 
   Serial.println("Invalid command. Type \"help set\" to see how to use this command.");
 	return 0;
 }
 
+void help_set(){
+  Serial.println("Change config values.");
 
+  Serial.println("The following parameters are available:");
+
+  for(int i=0; i < num_set_args; i++){
+      Serial.print("  ");
+      Serial.println(set_args[i]);
+  }
+}
+
+void help_help(){
+  Serial.println("The following commands are available:");
+
+  for(int i=0; i < num_commands; i++){
+      Serial.print("  ");
+      Serial.println(commands_str[i]);
+  }
+  Serial.println("");
+  Serial.println("You can for instance type \"help set\" for more info on the set command.");
+}
+
+void help_load(){
+  Serial.println("Load stored config from eeprom.");
+}
+
+void help_save(){
+  Serial.println("Store config to eeprom.");
+}
