@@ -28,6 +28,9 @@
 // Number of analog probes
 #define NUMREADS 20
 
+// OLED Display
+#define OLED
+
 // Peak indicator
 bool PEAK_INDICATOR = true;
 

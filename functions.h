@@ -18,27 +18,19 @@ Adafruit_NeoPixel pixels_right = Adafruit_NeoPixel(0, LED_DATA_RIGHT, NEO_GRB + 
 void initLeds(){
   if(MODE == DUAL) {
     pixels_left.updateLength(NUM_LEDS);
-    //pixels_left.setPin(LED_DATA_LEFT);
-    //Adafruit_NeoPixel pixels_left = Adafruit_NeoPixel(NUM_LEDS, LED_DATA_LEFT, NEO_GRB + NEO_KHZ800);
 
     #ifdef STEREO
       pixels_right.updateLength(NUM_LEDS);
       pinMode(LED_DATA_RIGHT, OUTPUT);
-      //pixels_left.setPin(LED_DATA_RIGHT);
-      //Adafruit_NeoPixel pixels_right = Adafruit_NeoPixel(NUM_LEDS, LED_DATA_RIGHT, NEO_GRB + NEO_KHZ800);
     #endif
 
   } else {
     #ifdef STEREO
       pixels_left.updateLength(NUM_LEDS *2);
-      //pixels_left.setPin(LED_DATA_LEFT);
-      //Adafruit_NeoPixel pixels_left = Adafruit_NeoPixel(NUM_LEDS *2, LED_DATA_LEFT, NEO_GRB + NEO_KHZ800);
     #endif
 
     #ifndef STEREO
       pixels_left.updateLength(NUM_LEDS);
-      //pixels_left.setPin(LED_DATA_LEFT);
-      //Adafruit_NeoPixel pixels_left = Adafruit_NeoPixel(NUM_LEDS, LED_DATA_LEFT, NEO_GRB + NEO_KHZ800);
     #endif
   }
 }
@@ -111,8 +103,8 @@ void setLeds(int leftVal, int rightVal){
       #endif
   }
 
-  #ifdef PEAK_INDICATOR
-  	color = getColor3(leftPeak, (int)leftPeak);
+  if(PEAK_INDICATOR) {
+    color = getColor3(leftPeak, (int)leftPeak);   
 
     r = (color >> 16) & 0xff;
     g = (color >> 8) & 0xff;
@@ -120,8 +112,8 @@ void setLeds(int leftVal, int rightVal){
 
     if(MODE == MIRROR) pixels_left.setPixelColor(NUM_LEDS - (int)leftPeak, pixels_left.Color(r * BRIGHTNESS, g * BRIGHTNESS, b * BRIGHTNESS));
     else pixels_left.setPixelColor((int)leftPeak, pixels_left.Color(r * BRIGHTNESS, g * BRIGHTNESS, b * BRIGHTNESS));
-  #endif
-
+  }
+  	
   #ifdef STEREO
     if(PEAK_INDICATOR) {
       color = getColor3(rightPeak, (int)rightPeak);
@@ -211,12 +203,15 @@ void dumpConfig(){
   Serial.print("CHANNEL_DECAY: ");
   Serial.println(CHANNEL_DECAY, 5);
 
-  #ifdef PEAK_INDICATOR
-    Serial.println("Peak Indicator");
+  if(PEAK_INDICATOR) {
+    Serial.println("Peak Indicator on");
     Serial.print("PEAK_DECAY: ");
     Serial.println(PEAK_DECAY, 5);
-  #endif
-
+    
+  } else {
+    Serial.println("Peak Indicator off");
+  }
+  
   #ifdef STEREO
     Serial.println("Stereo");
   #endif
@@ -225,25 +220,17 @@ void dumpConfig(){
     Serial.println("Mono");
   #endif
 
-  #if MODE == DUAL
+  if(MODE == DUAL) {
     Serial.println("2 Data out channels");
     Serial.println("Dual mode");
 
-  #else
+  } else {
     Serial.println("1 Data out channel");
 
-    #if MODE == STRIPPED
-      Serial.println("Stripped mode");
-    #endif
-
-    #if MODE == MIRROR
-      Serial.println("Mirror mode");
-    #endif
-
-    #if MODE == FOLDED
-      Serial.println("Folded mode");
-    #endif
-  #endif
+    if(MODE == STRIPPED) Serial.println("Stripped mode");
+    if(MODE == MIRROR) Serial.println("Mirror mode");
+    if(MODE == FOLDED) Serial.println("Folded mode");
+  }
 
   Serial.print("Number of leds: ");
   Serial.println(NUM_LEDS, DEC);

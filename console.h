@@ -1,3 +1,8 @@
+#ifndef CONSOLE_H
+#define CONSOLE_H
+
+#include "menu.h"
+
 #define LINE_BUF_SIZE 64   //Maximum input string length
 #define ARG_BUF_SIZE 32     //Maximum argument string length
 #define MAX_NUM_ARGS 3      //Maximum number of arguments
@@ -13,6 +18,7 @@ int cmd_dump();
 int cmd_save();
 int cmd_load();
 int cmd_set();
+int cmd_menu();
 
 void help_help();
 void help_load();
@@ -29,7 +35,8 @@ int (*commands_func[])(){
     &cmd_dump,
     &cmd_save,
     &cmd_load,
-    &cmd_set
+    &cmd_set,
+    &cmd_menu
 };
 
 //List of command names
@@ -38,7 +45,16 @@ const char *commands_str[] = {
     "dump",
     "save",
     "load",
-    "set"
+    "set",
+    "menu"
+};
+
+const char *menu_args[] = {
+  "up",
+  "down",
+  "left",
+  "right",
+  "click"
 };
 
 //List of set sub commands
@@ -62,12 +78,12 @@ int execute();
 
 int num_commands = sizeof(commands_str) / sizeof(char *);
 int num_set_args = sizeof(set_args) / sizeof(char *);
+int num_menu_args = sizeof(menu_args) / sizeof(char *);
 
 void cli_init(){
   Serial.println("VU Meter Console.");
   Serial.println("Type \"help\" to see a list of commands.");
 }
-
 
 void my_cli(){
   if(!read_line()) return;
@@ -187,7 +203,6 @@ int cmd_save(){
 int cmd_load(){
   if(loadSettings()){
     Serial.println("Config loaded");
-    //dumpConfig();
     return 1;
   }
 
@@ -205,6 +220,7 @@ int cmd_set(){
   }
 
   switch(arg){
+    #ifdef CALIBRATION_POTI
     case 0:
 		  Serial.print("setting amplify to: ");
 
@@ -215,7 +231,7 @@ int cmd_set(){
       }
 
       break;
-
+    #endif
 		case 1:
       Serial.print("setting brightness to: ");
       if(atof(args[2]) > 0){
@@ -262,6 +278,7 @@ int cmd_set(){
       if(atoi(args[2]) > 0){
         NUM_LEDS = atoi(args[2]);
         Serial.println(NUM_LEDS, DEC);
+        initLeds();
         return 1;
       }
       break;
@@ -331,6 +348,8 @@ int cmd_set(){
         Serial.println("Folded");
         MODE = FOLDED;
       }
+
+      initLeds();
       return 1;
 
     default:
@@ -341,6 +360,40 @@ int cmd_set(){
 
   Serial.println("Invalid command. Type \"help set\" to see how to use this command.");
 	return 0;
+}
+
+int cmd_menu(){
+  int arg = -1;
+
+  for(int i=0; i < num_menu_args; i++){
+    if(strcmp(args[1], menu_args[i]) == 0) {
+      arg = i;
+      break;
+    }
+  }
+
+  switch(arg){
+    case 0: // UP
+      handle_menu_up();
+      break;
+
+    case 1: // DOWN
+      handle_menu_down();
+      break;
+
+    case 3: // LEFT
+      handle_menu_left();
+      break;
+
+    case 4: // RIGHT
+      handle_menu_right();
+      break;
+
+    default:  // CLICK
+      break;
+  }
+
+  return 1;
 }
 
 void help_set(){
@@ -372,3 +425,5 @@ void help_load(){
 void help_save(){
   Serial.println("Store config to eeprom.");
 }
+
+#endif
