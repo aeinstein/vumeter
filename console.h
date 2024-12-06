@@ -7,7 +7,7 @@
 #define ARG_BUF_SIZE 32     //Maximum argument string length
 #define MAX_NUM_ARGS 3      //Maximum number of arguments
 
-bool error_flag = false;
+bool newData = false;
 
 char line[LINE_BUF_SIZE];
 char args[MAX_NUM_ARGS][ARG_BUF_SIZE];
@@ -87,31 +87,34 @@ void cli_init(){
 
 void my_cli(){
   if(!read_line()) return;
-  if(!error_flag) parse_line();
-  if(!error_flag) execute();
+  if(!newData) return;
+  parse_line();
+  execute();
 
   memset(line, 0, LINE_BUF_SIZE);
   memset(args, 0, sizeof(args[0][0]) * MAX_NUM_ARGS * ARG_BUF_SIZE);
-
-  error_flag = false;
 }
 
-bool read_line(){
-  String line_string;
+bool read_line() {
+  static byte ndx = 0;
+  char endMarker = '\n';
+  char rc;
+  
+  while (Serial.available() > 0 && newData == false) {
+    rc = Serial.read();
 
-  while(!Serial.available()) return 0;
+    if (rc != endMarker) {
+      line[ndx] = rc;
+      ndx++;
 
-  if(Serial.available()){
-    line_string = Serial.readStringUntil("\n");
-
-    if(line_string.length() < LINE_BUF_SIZE){
-      line_string.toCharArray(line, LINE_BUF_SIZE);
-      Serial.println(line_string);
-      return 1;
+      if (ndx >= LINE_BUF_SIZE) 
+        ndx = LINE_BUF_SIZE - 1;
 
     } else {
-      Serial.println("Input string too long.");
-      error_flag = true;
+      line[ndx] = '\0'; // terminate the string
+      ndx = 0;
+      newData = true;
+      return 1;
     }
   }
 
@@ -119,27 +122,31 @@ bool read_line(){
 }
 
 void parse_line(){
-    char *argument;
-    int counter = 0;
+  if(!newData) return;
+  newData = false;
 
-    argument = strtok(line, " ");
+  char *argument;
+  int counter = 0;
 
-    while((argument != NULL)){
-        if(counter < MAX_NUM_ARGS){
-            if(strlen(argument) < ARG_BUF_SIZE){
-                strcpy(args[counter], argument);
-                argument = strtok(NULL, " ");
-                counter++;
+  argument = strtok(line, " ");
 
-            } else{
-                Serial.println("Input string too long.");
-                error_flag = true;
-                break;
-            }
-        } else {
-            break;
-        }
+  while((argument != NULL)){
+    if(counter < MAX_NUM_ARGS){
+      if(strlen(argument) < ARG_BUF_SIZE){
+        strcpy(args[counter], argument);
+        argument = strtok(NULL, " ");
+        counter++;
+
+      } else{
+        Serial.println("Input string too long.");
+        newData = false;
+        break;
+      }
+      
+    } else {
+        break;
     }
+  }
 }
 
 int execute(){

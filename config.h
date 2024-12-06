@@ -23,7 +23,7 @@
 #define CALIBRATION_POTI A3
 
 // delay per loop, default 5ms
-#define DELAY_MS 5
+#define DELAY_MS 10
 
 // Number of analog probes
 #define NUMREADS 20
