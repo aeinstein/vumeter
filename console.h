@@ -203,6 +203,7 @@ int cmd_save(){
 int cmd_load(){
   if(loadSettings()){
     Serial.println("Config loaded");
+    handle_menu(1);
     return 1;
   }
 
@@ -227,7 +228,6 @@ int cmd_set(){
       if(atof(args[2]) > 0){
         AMPLIFY = atof(args[2]);
         Serial.println(AMPLIFY, 3);
-        return 1;
       }
 
       break;
@@ -237,7 +237,6 @@ int cmd_set(){
       if(atof(args[2]) > 0){
         BRIGHTNESS = atof(args[2]);
         Serial.println(BRIGHTNESS, 3);
-        return 1;
       }
       break;
 
@@ -247,7 +246,6 @@ int cmd_set(){
       if(strtoul(args[2], 0, 16) > 0){
         GLOWNESS = strtoul(args[2], 0, 16);
         Serial.println(GLOWNESS, HEX);
-        return 1;
       }
       break;
 
@@ -257,7 +255,6 @@ int cmd_set(){
       if(atof(args[2]) > 0){
         PEAK_DECAY = atof(args[2]);
         Serial.println(PEAK_DECAY, 3);
-        return 1;
       }
 
       break;
@@ -268,7 +265,6 @@ int cmd_set(){
       if(atof(args[2]) > 0){
         CHANNEL_DECAY = atof(args[2]);
         Serial.println(CHANNEL_DECAY, 3);
-        return 1;
       }
       break;
 
@@ -279,7 +275,6 @@ int cmd_set(){
         NUM_LEDS = atoi(args[2]);
         Serial.println(NUM_LEDS, DEC);
         initLeds();
-        return 1;
       }
       break;
 
@@ -288,7 +283,6 @@ int cmd_set(){
       if(strtoul(args[2], 0, 16) > 0){
         LC = strtoul(args[2], 0, 16);
         Serial.println(LC, HEX);
-        return 1;
       }
 
       break;
@@ -299,7 +293,6 @@ int cmd_set(){
       if(strtoul(args[2], 0, 16) > 0){
         MC = strtoul(args[2], 0, 16);
         Serial.println(MC, HEX);
-        return 1;
       }
       break;
 
@@ -309,7 +302,6 @@ int cmd_set(){
       if(strtoul(args[2], 0, 16) > 0){
         HC = strtoul(args[2], 0, 16);
         Serial.println(HC, HEX);
-        return 1;
       }
       break;
 
@@ -319,12 +311,10 @@ int cmd_set(){
       if(strcmp(args[2], "on") == 0) {
         Serial.println("on");
         PEAK_INDICATOR = true;
-        return 1;
 
       } else {
         Serial.println("off");
         PEAK_INDICATOR = false;
-        return 1;
       }
 
       break;
@@ -350,16 +340,18 @@ int cmd_set(){
       }
 
       initLeds();
-      return 1;
+      break;
 
     default:
-      Serial.print(args[1]);
-      Serial.println("not recognized");
-      break;
+      Serial.println("Invalid command. Type \"help set\" to see how to use this command.");
+	    return 0;
 	}
+  
+  #ifdef OLED
+    handle_menu(true);
+  #endif
 
-  Serial.println("Invalid command. Type \"help set\" to see how to use this command.");
-	return 0;
+  return 1;
 }
 
 int cmd_menu(){
@@ -381,11 +373,11 @@ int cmd_menu(){
       handle_menu_down();
       break;
 
-    case 3: // LEFT
+    case 2: // LEFT
       handle_menu_left();
       break;
 
-    case 4: // RIGHT
+    case 3: // RIGHT
       handle_menu_right();
       break;
 

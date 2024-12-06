@@ -7,7 +7,7 @@
 U8G2_SSD1306_128X64_NONAME_1_HW_I2C u8g2(U8G2_R0, /* reset=*/ U8X8_PIN_NONE);
 
 void u8g2_prepare(void) {
-  u8g2.setFont(u8g2_font_6x10_tf);
+  //u8g2.setFont(u8g2_font_6x10_tf);
   u8g2.setFontRefHeightExtendedText();
   u8g2.setDrawColor(1);
   u8g2.setFontPosTop();
@@ -29,6 +29,7 @@ bool display_setup() {
   u8g2_prepare();
 
   Serial.println("OLED inited");
+  delay(50);
   return 1;
 }
 

@@ -31,11 +31,11 @@
 // OLED Display
 #define OLED
 
-// Peak indicator
-bool PEAK_INDICATOR = true;
-
 // Default Config Values on first Start
 // These are editable on the fly
+
+// Peak indicator
+bool PEAK_INDICATOR = true;
 
 // led stripe mode
 byte MODE = STRIPPED;

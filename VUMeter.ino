@@ -20,6 +20,7 @@ void setup() {
 
   #ifdef OLED
     display_setup();
+    handle_menu(true);     // init menu
   #endif
 }
 
@@ -36,17 +37,7 @@ void loop() {
     Serial.println(AMPLIFY, 3);
 
     #ifdef OLED
-      char result[8];
-      dtostrf(AMPLIFY, 6, 2, result); // Leave room for too large numbers!
-
-      u8g2.firstPage(); 
-
-      do{
-        u8g2.setFont(u8g2_font_8x13_tr);
-        u8g2.drawStr( 5, 1, "Amplify");
-        u8g2.setFont(u8g2_font_10x20_tr);
-        u8g2.drawStr( 5, 20, result);
-      }while(u8g2.nextPage());
+      handle_menu(true);
     #endif
   }
 #endif
@@ -87,6 +78,6 @@ void loop() {
   }
   
   #ifdef OLED
-    //handle_menu();
+    handle_menu();
   #endif
 }

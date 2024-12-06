@@ -17,7 +17,7 @@ struct MyConfig {
   float BRIGHTNESS;       // 4
   unsigned long GLOWNESS; // 4
   byte MODE;              // 1
-  char SIGNATURE[3];
+  char SIGNATURE[4];
 };
 
 
@@ -38,7 +38,7 @@ void saveSettings(){
     BRIGHTNESS,
     GLOWNESS,
     MODE,
-    "MKB"
+    "MKB\0"
   };
 
   EEPROM.put(addr, config);
