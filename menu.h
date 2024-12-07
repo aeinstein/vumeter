@@ -8,20 +8,21 @@ int lastItem = 0;
 bool valSelected = false;
 
 const char *settings_list[] = {
-    "Number of leds",
-    "Peak decay",
-    "Channel decay",
-    "Brightness",
-    "Glowness",
-    "Mode",
+    "Number of leds",   // 0
+    "Peak decay",       // 1
+    "Peak indicator",   // 2
+    "Channel decay",    // 3
+    "Brightness",       // 4
+    "Glowness",         // 5
+    "Mode",             // 6
     #ifndef CALIBRATION_POTI
-    "Amplify",
+    "Amplify",          // 7
     #endif
-    "Color Low",
-    "Color Mid",
-    "Color High",
-    "Load Settings",
-    "Save Settings"
+    "Color Low",        // 8
+    "Color Mid",        // 9
+    "Color High",       // 10
+    "Load Settings",    // 11
+    "Save Settings"     // 12
 };
 
 int num_settings = sizeof(settings_list) / sizeof(char *);
@@ -53,6 +54,10 @@ void changeValue(bool increase = true){
       break;
 
     case 2:
+      PEAK_INDICATOR = !PEAK_INDICATOR;
+      break;
+
+    case 3:
       if(increase) {
         CHANNEL_DECAY += 0.02;
         if(CHANNEL_DECAY >= 1) CHANNEL_DECAY = 0.01;
@@ -64,7 +69,7 @@ void changeValue(bool increase = true){
 
       break;
 
-    case 3:
+    case 4:
       if(increase) {
         BRIGHTNESS += 0.01;
         if(BRIGHTNESS > 1) BRIGHTNESS = 0.01;
@@ -76,7 +81,7 @@ void changeValue(bool increase = true){
 
       break;
 
-    case 5:
+    case 6:
       if(increase) {
         MODE++;
         if(MODE >4) MODE = 1;
@@ -88,7 +93,7 @@ void changeValue(bool increase = true){
       break;
 
   #ifdef CALIBRATION_POTI
-    case 6:
+    case 7:
       if(increase) {
         AMPLIFY += 0.1;
         if(AMPLIFY >3) AMPLIFY = 3;
@@ -99,22 +104,21 @@ void changeValue(bool increase = true){
       }
       break;
 
-
-    case 10:
+    case 11:
       if(increase) loadSettings();
       break;
 
-    case 11:
+    case 12:
       if(increase) saveSettings();
       break;
   #endif
 
   #ifndef CALIBRATION_POTI
-    case 9:
+    case 10:
       if(increase) loadSettings();
       break;
 
-    case 10:
+    case 11:
       if(increase) saveSettings();
       break;
   #endif
@@ -145,7 +149,7 @@ void handle_menu(bool force = false){
       u8g2.setDrawColor(0);
     }
 
-    u8g2.drawStr( 5, 0, settings_list[currentItem]);
+    u8g2.drawStr( ALIGN_CENTER(settings_list[currentItem]), 0, settings_list[currentItem]);
 
     switch(currentItem){
       case 0:
@@ -157,25 +161,49 @@ void handle_menu(bool force = false){
         break;
 
       case 2:
-        dtostrf(CHANNEL_DECAY, 4, 2, result);
+        if(PEAK_INDICATOR) strcpy(result, "ON");
+        else strcpy(result, "OFF");
         break;
 
       case 3:
-        dtostrf(BRIGHTNESS, 4, 2, result);
+        dtostrf(CHANNEL_DECAY, 4, 2, result);
         break;
 
       case 4:
-        sprintf(result, "%06X", GLOWNESS);
+        dtostrf(BRIGHTNESS, 4, 2, result);
         break;
 
       case 5:
+        sprintf(result, "%06X", GLOWNESS);
+        break;
+
+      case 6:
         itoa(MODE, result, 10);
         break;
   #ifndef CALIBRATION_POTI
-      case 6:
+      case 7:
         dtostrf(AMPLIFY, 4, 2, result);
         break;
 
+      case 8:
+        sprintf(result, "%06X", LC);
+        break;
+
+      case 9:
+        sprintf(result, "%06X", MC);
+        break;
+
+      case 10:
+        sprintf(result, "%06X", HC);
+        break;
+
+      case 11:
+      case 12:
+        strcpy(result, "Press right");
+        break;
+  #endif
+
+  #ifdef CALIBRATION_POTI
       case 7:
         sprintf(result, "%06X", LC);
         break;
@@ -192,25 +220,6 @@ void handle_menu(bool force = false){
       case 11:
         strcpy(result, "Press right");
         break;
-  #endif
-
-  #ifdef CALIBRATION_POTI
-      case 6:
-        sprintf(result, "%06X", LC);
-        break;
-
-      case 7:
-        sprintf(result, "%06X", MC);
-        break;
-
-      case 8:
-        sprintf(result, "%06X", HC);
-        break;
-
-      case 9:
-      case 10:
-        strcpy(result, "Press right");
-        break;
 
   #endif
       default:
@@ -225,7 +234,7 @@ void handle_menu(bool force = false){
     }
     
     u8g2.setFont(u8g2_font_10x20_tr);
-    u8g2.drawStr( 5, 20, result);
+    u8g2.drawStr(ALIGN_CENTER(result), 20, result);
 
     #ifdef CALIBRATION_POTI
       u8g2.setDrawColor(1);
