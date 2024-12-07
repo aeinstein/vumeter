@@ -389,6 +389,7 @@ int cmd_menu(){
       break;
 
     default:  // CLICK
+      handle_menu_click();
       break;
   }
 

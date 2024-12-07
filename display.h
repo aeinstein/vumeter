@@ -10,6 +10,7 @@ void u8g2_prepare(void) {
   //u8g2.setFont(u8g2_font_6x10_tf);
   u8g2.setFontRefHeightExtendedText();
   u8g2.setDrawColor(1);
+  u8g2.setFontMode(1);
   u8g2.setFontPosTop();
   u8g2.setFontDirection(0);
 }

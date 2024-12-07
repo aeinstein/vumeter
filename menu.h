@@ -5,6 +5,7 @@
 
 int currentItem = 0;
 int lastItem = 0;
+bool valSelected = false;
 
 const char *settings_list[] = {
     "Number of leds",
@@ -134,9 +135,17 @@ void handle_menu(bool force = false){
   u8g2.firstPage();
   
   do{
+    u8g2.setDrawColor(1);
     u8g2.setFont(u8g2_font_8x13_tr);
+
+    if(valSelected) {
+      u8g2.drawLine(0, 15, 127, 15);
+    } else {
+      u8g2.drawBox(0, 0, 127, 15);
+      u8g2.setDrawColor(0);
+    }
+
     u8g2.drawStr( 5, 0, settings_list[currentItem]);
-    u8g2.drawLine(0, 15, 127, 15);
 
     switch(currentItem){
       case 0:
@@ -208,10 +217,18 @@ void handle_menu(bool force = false){
         break;
     }
 
+    u8g2.setDrawColor(1);
+
+    if(valSelected) {
+      u8g2.drawBox(0, 16, 127, 28);
+      u8g2.setDrawColor(0);
+    }
+    
     u8g2.setFont(u8g2_font_10x20_tr);
     u8g2.drawStr( 5, 20, result);
 
     #ifdef CALIBRATION_POTI
+      u8g2.setDrawColor(1);
       u8g2.drawLine(0, 45, 127, 45);
       u8g2.setFont(u8g2_font_8x13_tr);
       u8g2.drawStr( 5, 50, "Amplify:");
@@ -224,18 +241,6 @@ void handle_menu(bool force = false){
   lastItem = currentItem;
 }
 
-void handle_menu_up(){
-  currentItem++;
-  if(currentItem >= num_settings) currentItem = 0;
-  handle_menu();
-}
-
-void handle_menu_down(){
-  currentItem--;
-  if(currentItem <= 0) currentItem = num_settings -1;
-  handle_menu();
-}
-
 void handle_menu_left(){
   changeValue(0);
   handle_menu(true);
@@ -243,6 +248,33 @@ void handle_menu_left(){
 
 void handle_menu_right(){
   changeValue(1);
+  handle_menu(true);
+}
+
+void handle_menu_up(){
+  if(valSelected) {
+    handle_menu_right();
+    return;
+  }
+
+  currentItem++;
+  if(currentItem >= num_settings) currentItem = 0;
+  handle_menu();
+}
+
+void handle_menu_down(){
+  if(valSelected) {
+    handle_menu_left();
+    return;
+  }
+
+  currentItem--;
+  if(currentItem <= 0) currentItem = num_settings -1;
+  handle_menu();
+}
+
+void handle_menu_click(){
+  valSelected = !valSelected;
   handle_menu(true);
 }
 

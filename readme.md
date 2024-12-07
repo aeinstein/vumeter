@@ -1,5 +1,6 @@
 # VU-Meter
-Fast and dirty VU-Meter with NeoPixel LedStrips and teensy lc for my home DJ Desk
+Fast and dirty VU-Meter with NeoPixel LedStrips and teensy lc for my home DJ Desk. 
+Maximum size with OLED < 64kb.
 
 
 ## Features
@@ -12,6 +13,7 @@ Fast and dirty VU-Meter with NeoPixel LedStrips and teensy lc for my home DJ Des
 * compatibel with all neopixel strips
 * Config saved in eeprom
 * Serial Console for on the fly changes
+* Optional OLED display for config
 
 
 ## Example Setup with Keystone Modules
@@ -77,12 +79,15 @@ Stripped   Mirror  Folded
 ## Config Options
 ```
 // Hardware Config
+#ifndef CONFIG
+#define CONFIG
+
 // Use Stereo input. If mono then only left channel is used
 #define STEREO
 
 // Analog in pins
-#define Left_IN A1
-#define Right_IN A2
+#define Left_IN A2
+#define Right_IN A1
 
 // Data out pins
 #define LED_DATA_LEFT 2
@@ -94,46 +99,17 @@ Stripped   Mirror  Folded
 #define MIRROR 3
 #define FOLDED 4
 
-#define MODE STRIPPED
-
 // Install poti, for onthefly calibration
-//#define CALIBRATION_POTI A3
+#define CALIBRATION_POTI A3
 
 // delay per loop, default 5ms
-#define DELAY_MS 20
+#define DELAY_MS 10
 
 // Number of analog probes
 #define NUMREADS 20
 
-// Peak indicator
-#define PEAK_INDICATOR
-
-// Default Config Values on first Start
-// These are editable on the fly
-
-// Number of leds per channel
-unsigned int NUM_LEDS = 14;
-
-// 10%
-float BRIGHTNESS = 0.1f;
-
-// idle color
-//unsigned int GLOWNESS = 0;
-unsigned long GLOWNESS = 0x000000;
-
-// decay of channel value
-float CHANNEL_DECAY = 0.5f;
-
-// Peak, default decay 0.05f
-float PEAK_DECAY = 0.1f;
-
-// input calibration
-float AMPLIFY = 2.5f;
-
-// The Colors
-unsigned long LC = 0x00FF00;
-unsigned long MC = 0x0000FF;
-unsigned long HC = 0xFF0000;
+// OLED Display
+#define OLED
 ```
 
 ## Serial Console
@@ -142,6 +118,7 @@ unsigned long HC = 0xFF0000;
 * save
 * dump
 * set CONFIGVAR VALUE
+* menu KEY  (for testing)
 
 ### Configvars
 * brightness
@@ -153,6 +130,12 @@ unsigned long HC = 0xFF0000;
 * midcolor
 * highcolor
 
+### Menu keys
+* up
+* down
+* left
+* right
+
 ### Example
 ```
 set brightness 0.1
@@ -160,8 +143,13 @@ set midcolor 0000FF
 save
 ```
 
+## Install calibration trimmer (optional)
+* Use a 10kOhm Poti
+* connect outer pins to power and slider to an analog input
+
+## Install OLED (optional)
+
+
 ## Upcoming
 * more Color effects
-* trimmer for calibration
-* OLED für Configuration
 * little filter circuit
