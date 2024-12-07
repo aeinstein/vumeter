@@ -155,6 +155,7 @@ void handle_menu(bool force = false){
     switch(currentItem){
       case 0:
         itoa(NUM_LEDS, result, 10);
+        initLeds();
         break;
 
       case 1:
@@ -180,6 +181,7 @@ void handle_menu(bool force = false){
 
       case 6:
         itoa(MODE, result, 10);
+        initLeds();
         break;
   #ifndef CALIBRATION_POTI
       case 7:
