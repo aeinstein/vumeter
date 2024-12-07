@@ -149,7 +149,8 @@ void handle_menu(bool force = false){
       u8g2.setDrawColor(0);
     }
 
-    u8g2.drawStr( ALIGN_CENTER(settings_list[currentItem]), 0, settings_list[currentItem]);
+    // Title
+    u8g2.drawStr( ALIGN_CENTER(settings_list[currentItem]), 1, settings_list[currentItem]);
 
     switch(currentItem){
       case 0:
@@ -242,7 +243,7 @@ void handle_menu(bool force = false){
       u8g2.setFont(u8g2_font_8x13_tr);
       u8g2.drawStr( 5, 50, "Amplify:");
       dtostrf(AMPLIFY, 4, 2, result);
-      u8g2.drawStr( 80, 50, result);
+      u8g2.drawStr( 90, 50, result);
     #endif
 
   }while(u8g2.nextPage());

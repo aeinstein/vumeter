@@ -1,7 +1,9 @@
 #ifndef CONSOLE_H
 #define CONSOLE_H
 
-#include "menu.h"
+#ifdef OLED
+  #include "menu.h"
+#endif
 
 #define LINE_BUF_SIZE 64   //Maximum input string length
 #define ARG_BUF_SIZE 32     //Maximum argument string length
@@ -18,7 +20,10 @@ int cmd_dump();
 int cmd_save();
 int cmd_load();
 int cmd_set();
-int cmd_menu();
+
+#ifdef OLED
+  int cmd_menu();
+#endif
 
 void help_help();
 void help_load();
@@ -36,7 +41,9 @@ int (*commands_func[])(){
     &cmd_save,
     &cmd_load,
     &cmd_set,
+  #ifdef OLED
     &cmd_menu
+  #endif
 };
 
 //List of command names
@@ -46,8 +53,33 @@ const char *commands_str[] = {
     "save",
     "load",
     "set",
+  #ifdef OLED
     "menu"
+  #endif
 };
+
+int num_commands = sizeof(commands_str) / sizeof(char *);
+
+//List of set sub commands
+const char *set_args[] = {
+  "amplify",
+  "brightness",
+  "glowness",
+  "peak_decay",
+  "channel_decay",
+  "num_leds",
+  "lowcolor",
+  "midcolor",
+  "highcolor",
+  "peak_indicator",
+  "mode",
+};
+
+int num_set_args = sizeof(set_args) / sizeof(char *);
+
+void parse_line();
+bool read_line();
+int execute();
 
 const char *menu_args[] = {
   "up",
@@ -57,27 +89,6 @@ const char *menu_args[] = {
   "click"
 };
 
-//List of set sub commands
-const char *set_args[] = {
-  "amplify",
-	"brightness",
-  "glowness",
-  "peak_decay",
-  "channel_decay",
-	"num_leds",
-	"lowcolor",
-  "midcolor",
-  "highcolor",
-  "peak_indicator",
-  "mode",
-};
-
-void parse_line();
-bool read_line();
-int execute();
-
-int num_commands = sizeof(commands_str) / sizeof(char *);
-int num_set_args = sizeof(set_args) / sizeof(char *);
 int num_menu_args = sizeof(menu_args) / sizeof(char *);
 
 void cli_init(){
@@ -210,7 +221,9 @@ int cmd_save(){
 int cmd_load(){
   if(loadSettings()){
     Serial.println("Config loaded");
+    #ifdef OLED
     handle_menu(1);
+    #endif
     return 1;
   }
 
@@ -361,6 +374,7 @@ int cmd_set(){
   return 1;
 }
 
+#ifdef OLED
 int cmd_menu(){
   int arg = -1;
 
@@ -395,6 +409,7 @@ int cmd_menu(){
 
   return 1;
 }
+#endif
 
 void help_set(){
   Serial.println("Change config values.");

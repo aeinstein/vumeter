@@ -1,5 +1,5 @@
 # VU-Meter
-Fast and dirty VU-Meter with NeoPixel LedStrips and teensy lc for my home DJ Desk. 
+Fast and dirty VU-Meter with NeoPixel LedStrips and teensy lc for my home DJ Desk.  
 Maximum size with OLED < 64kb.
 
 
@@ -118,38 +118,45 @@ Stripped   Mirror  Folded
 * save
 * dump
 * set CONFIGVAR VALUE
-* menu KEY  (for testing)
+* menu KEY (only if OLED is installed)
 
 ### Configvars
-* brightness
-* glowness
-* peak_decay
-* channel_decay
-* num_leds
-* lowcolor
-* midcolor
-* highcolor
+* brightness [FLOAT]
+* glowness [COLOR]
+* peak_decay [FLOAT]
+* peak_indicator [on|off]
+* channel_decay [FLOAT]
+* num_leds [INT]
+* lowcolor [COLOR]
+* midcolor [COLOR]
+* highcolor [COLOR]
 
-### Menu keys
+### Menu keys (only if OLED is installed)
 * up
 * down
 * left
 * right
+* click
 
 ### Example
 ```
 set brightness 0.1
 set midcolor 0000FF
+menu up
+menu click
 save
 ```
 
 ## Install calibration trimmer (optional)
 * Use a 10kOhm Poti
 * connect outer pins to power and slider to an analog input
+* the amplify setting is removed from settings while poti is installed
 
 ## Install OLED (optional)
-
+* without poti the amplify setting is in settings
+* with poti the amplify setting is rendered in the lower area
 
 ## Upcoming
 * more Color effects
 * little filter circuit
+* rotary and dpad knobs
